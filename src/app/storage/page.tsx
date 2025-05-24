@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SearchBar from '../components/storage/SearchBar';
 import ImageGrid from '../components/storage/ImageGrid';
 import FilterOptions from '../components/storage/FilterOptions';
 import Pagination from '../components/storage/Pagination';
 import { Screenshot } from '../types/screenshot';
 import { screenshotService } from '../services/screenshotService';
+
+const ITEMS_PER_PAGE_OPTIONS = [12, 24, 36, 48];
 
 export default function StoragePage() {
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
@@ -17,10 +19,9 @@ export default function StoragePage() {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
 
-  const itemsPerPage = 12;
-
-  const fetchScreenshots = async () => {
+  const fetchScreenshots = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -40,11 +41,16 @@ export default function StoragePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, selectedTags, sortBy, itemsPerPage]);
 
   useEffect(() => {
     fetchScreenshots();
-  }, [currentPage, searchQuery, selectedTags, sortBy]);
+  }, [fetchScreenshots]);
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -81,6 +87,26 @@ export default function StoragePage() {
           selectedTags={selectedTags}
           sortBy={sortBy}
         />
+      </div>
+
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-600">페이지당 표시:</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+            className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}개
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="text-gray-600">
+          총 {screenshots.length}개의 스크린샷
+        </div>
       </div>
 
       {loading ? (
