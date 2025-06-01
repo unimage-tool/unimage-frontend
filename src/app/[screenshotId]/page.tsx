@@ -14,9 +14,9 @@ export default async function ScreenshotPage() {
   const { screenshot, originalUrl, widthPx, heightPx } = await fetchScreenshotData();
 
   return (
-    <>
-      <h1>{originalUrl}</h1>
+    <div className={styles.ScreenshotPage}>
+      <h1><a href={originalUrl} className={styles.OriginalUrl}>{originalUrl}</a></h1>
       <Image src={screenshot} alt={originalUrl} width={widthPx} height={heightPx} />
-    </>
+    </div>
   );
 }
