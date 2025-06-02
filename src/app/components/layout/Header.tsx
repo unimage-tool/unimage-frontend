@@ -36,6 +36,9 @@ export default function Header() {
             <Link href="/pricing" className="text-gray-600 hover:text-blue-600">
               요금제
             </Link>
+            <Link href="/upload" className="text-gray-600 hover:text-blue-600">
+              업로드
+            </Link>
             <Link href="/storage" className="text-gray-600 hover:text-blue-600">
               저장소
             </Link>
@@ -82,6 +85,12 @@ export default function Header() {
                 className="text-gray-600 hover:text-blue-600"
               >
                 요금제
+              </Link>
+              <Link
+                href="/upload"
+                className="text-gray-600 hover:text-blue-600"
+              >
+                업로드
               </Link>
               <Link
                 href="/storage"
