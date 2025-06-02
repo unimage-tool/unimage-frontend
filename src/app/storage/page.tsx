@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import SearchBar from '../components/storage/SearchBar';
 import ImageGrid from '../components/storage/ImageGrid';
 import FilterOptions from '../components/storage/FilterOptions';
 import Pagination from '../components/storage/Pagination';
 import { Screenshot } from '../types/screenshot';
 import { screenshotService } from '../services/screenshotService';
+import { FaPlus } from 'react-icons/fa';
 
 const ITEMS_PER_PAGE_OPTIONS = [12, 24, 36, 48];
 
@@ -74,7 +76,16 @@ export default function StoragePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">내 스크린샷 저장소</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">내 스크린샷 저장소</h1>
+        <Link
+          href="/upload"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 transition-colors"
+        >
+          <FaPlus />
+          <span>이미지 업로드</span>
+        </Link>
+      </div>
 
       <div className="mb-8">
         <SearchBar onSearch={handleSearch} />
@@ -126,7 +137,16 @@ export default function StoragePage() {
       ) : screenshots.length === 0 ? (
         <div className="text-center py-16">
           <h3 className="text-xl font-semibold mb-2">검색 결과가 없습니다</h3>
-          <p className="text-gray-600">다른 검색어나 필터를 시도해보세요.</p>
+          <p className="text-gray-600 mb-4">
+            다른 검색어나 필터를 시도해보세요.
+          </p>
+          <Link
+            href="/upload"
+            className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <FaPlus />
+            <span>첫 번째 이미지 업로드하기</span>
+          </Link>
         </div>
       ) : (
         <>
