@@ -4,7 +4,6 @@ interface GetScreenshotsParams {
   page: number;
   limit: number;
   search?: string;
-  tags?: string[];
   sortBy?: 'newest' | 'oldest' | 'title';
 }
 
@@ -20,7 +19,6 @@ export const screenshotService = {
     page,
     limit,
     search,
-    tags,
     sortBy = 'newest',
   }: GetScreenshotsParams): Promise<GetScreenshotsResponse> {
     // 쿼리 파라미터 구성
@@ -32,10 +30,6 @@ export const screenshotService = {
 
     if (search) {
       params.append('search', search);
-    }
-
-    if (tags && tags.length > 0) {
-      params.append('tags', tags.join(','));
     }
 
     // API 호출

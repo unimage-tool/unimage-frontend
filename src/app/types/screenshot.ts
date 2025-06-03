@@ -4,5 +4,4 @@ export interface Screenshot {
   url: string;
   imageUrl: string;
   createdAt: string;
-  tags: string[];
 } 

@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Screenshot } from '../../types/screenshot';
-import { CalendarIcon, LinkIcon, TagIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 interface ImageGridProps {
   screenshots: Screenshot[];
@@ -58,22 +58,6 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
                 {screenshot.url}
               </a>
             </div>
-
-            {screenshot.tags.length > 0 && (
-              <div className="flex items-start gap-1 flex-wrap">
-                <TagIcon className="w-4 h-4 text-gray-500 mt-0.5" />
-                <div className="flex flex-wrap gap-1">
-                  {screenshot.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="px-4 py-3 bg-gray-50 border-t flex justify-between">
