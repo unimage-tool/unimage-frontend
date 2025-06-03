@@ -8,7 +8,6 @@ const MOCK_SCREENSHOTS: Screenshot[] = Array.from({ length: 1000 }, (_, i) => ({
   url: `https://example.com/page${i + 1}`,
   imageUrl: `/images/capture.jpg`,
   createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-  tags: ['웹', '디자인', '참고자료'].slice(0, (i % 3) + 1),
 }));
 
 export async function GET(request: NextRequest) {
@@ -17,7 +16,6 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '12');
   const search = searchParams.get('search') || undefined;
-  const tags = searchParams.get('tags')?.split(',') || undefined;
   const sortBy =
     (searchParams.get('sortBy') as 'newest' | 'oldest' | 'title') || 'newest';
 
@@ -29,11 +27,6 @@ export async function GET(request: NextRequest) {
         !item.title.toLowerCase().includes(query) &&
         !item.url.toLowerCase().includes(query)
       ) {
-        return false;
-      }
-    }
-    if (tags && tags.length > 0) {
-      if (!tags.some((tag) => item.tags.includes(tag))) {
         return false;
       }
     }
@@ -51,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
   });
 
-  // 검색 및 태그 필터링
+  // 검색 필터링
   const filteredItems = sortedItems.filter((item) => {
     if (search) {
       const query = search.toLowerCase();
@@ -59,11 +52,6 @@ export async function GET(request: NextRequest) {
         !item.title.toLowerCase().includes(query) &&
         !item.url.toLowerCase().includes(query)
       ) {
-        return false;
-      }
-    }
-    if (tags && tags.length > 0) {
-      if (!tags.some((tag) => item.tags.includes(tag))) {
         return false;
       }
     }

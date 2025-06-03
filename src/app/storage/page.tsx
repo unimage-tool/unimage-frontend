@@ -17,7 +17,6 @@ export default function StoragePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest');
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +30,6 @@ export default function StoragePage() {
         page: currentPage,
         limit: itemsPerPage,
         search: searchQuery,
-        tags: selectedTags,
         sortBy,
       });
 
@@ -43,7 +41,7 @@ export default function StoragePage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, selectedTags, sortBy, itemsPerPage]);
+  }, [currentPage, searchQuery, sortBy, itemsPerPage]);
 
   useEffect(() => {
     fetchScreenshots();
@@ -56,11 +54,6 @@ export default function StoragePage() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1);
-  };
-
-  const handleTagSelect = (tags: string[]) => {
-    setSelectedTags(tags);
     setCurrentPage(1);
   };
 
@@ -93,9 +86,7 @@ export default function StoragePage() {
 
       <div className="mb-8">
         <FilterOptions
-          onTagSelect={handleTagSelect}
           onSortChange={handleSortChange}
-          selectedTags={selectedTags}
           sortBy={sortBy}
         />
       </div>
