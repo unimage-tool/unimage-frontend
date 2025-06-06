@@ -2,16 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import StorageClient from '../components/storage/StorageClient';
-import { Screenshot } from '../types/screenshot';
-
-interface StoragePageProps {
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    sortBy?: 'newest' | 'oldest' | 'title';
-  };
-}
 
 async function getScreenshots({
   page,
@@ -43,11 +33,18 @@ async function getScreenshots({
   return response.json();
 }
 
-export default async function StoragePage({ searchParams }: StoragePageProps) {
-  const page = parseInt(searchParams.page || '1');
-  const limit = parseInt(searchParams.limit || '12');
-  const search = searchParams.search;
-  const sortBy = searchParams.sortBy || 'newest';
+export default async function StoragePage({ 
+  searchParams 
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  // Next.js 15에서 searchParams는 Promise이므로 await 필요
+  const resolvedSearchParams = await searchParams;
+  
+  const page = parseInt(resolvedSearchParams?.page as string || '1');
+  const limit = parseInt(resolvedSearchParams?.limit as string || '12');
+  const search = resolvedSearchParams?.search as string;
+  const sortBy = (resolvedSearchParams?.sortBy as 'newest' | 'oldest' | 'title') || 'newest';
 
   const response = await getScreenshots({
     page,
