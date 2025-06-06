@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { FaCloudUploadAlt, FaImage, FaLink, FaTimes } from 'react-icons/fa';
 
 interface UploadedImage {
@@ -212,11 +213,12 @@ export default function UploadPage() {
                 className="border rounded-lg p-4 bg-white shadow-sm"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <img
+                  <div className="flex-shrink-0 relative w-24 h-24">
+                    <Image
                       src={image.preview}
                       alt={`업로드 이미지 ${index + 1}`}
-                      className="w-24 h-24 object-cover rounded-lg"
+                      fill
+                      className="object-cover rounded-lg"
                     />
                   </div>
                   <div className="flex-grow">

@@ -29,7 +29,7 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
         >
           <div className="relative h-48 w-full overflow-hidden">
             <Image
-              src={screenshot.imageUrl}
+              src={screenshot.screenshotUrl}
               alt={screenshot.title}
               fill
               className="object-cover"
@@ -50,19 +50,19 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
             <div className="flex items-center text-sm text-gray-500 mb-3">
               <LinkIcon className="w-4 h-4 mr-1 flex-shrink-0" />
               <a
-                href={screenshot.url}
+                href={screenshot.originalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="truncate hover:text-blue-500"
               >
-                {screenshot.url}
+                {screenshot.originalUrl}
               </a>
             </div>
           </div>
 
           <div className="px-4 py-3 bg-gray-50 border-t flex justify-between">
             <Link
-              href={`/storage/${screenshot.id}`}
+              href={`/${screenshot.id}`}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               상세보기

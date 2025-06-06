@@ -1,14 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Screenshot } from '@/app/types/screenshot';
 
+// 무작위 크기 생성 함수
+const getRandomSize = () => {
+  const widths = [800, 1024, 1280, 1440, 1920];
+  const heights = [400, 600, 720, 900, 1080];
+  const width = widths[Math.floor(Math.random() * widths.length)];
+  const height = heights[Math.floor(Math.random() * heights.length)];
+  return { width, height };
+};
+
 // 임시 데이터 (실제로는 DB에서 가져옴)
-const MOCK_SCREENSHOTS: Screenshot[] = Array.from({ length: 1000 }, (_, i) => ({
-  id: i + 1,
-  title: `스크린샷 ${i + 1}`,
-  url: `https://example.com/page${i + 1}`,
-  imageUrl: `/images/capture.jpg`,
-  createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-}));
+const MOCK_SCREENSHOTS: Screenshot[] = Array.from({ length: 1000 }, (_, i) => {
+  const { width, height } = getRandomSize();
+  return {
+    id: i + 1,
+    title: `스크린샷 ${i + 1}`,
+    originalUrl: `https://picsum.photos`,
+    screenshotUrl: `https://picsum.photos/${width}/${height}`,
+    widthPx: width,
+    heightPx: height,
+    createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+  };
+});
 
 export async function GET(request: NextRequest) {
   // URL에서 쿼리 파라미터 추출
@@ -25,7 +39,7 @@ export async function GET(request: NextRequest) {
       const query = search.toLowerCase();
       if (
         !item.title.toLowerCase().includes(query) &&
-        !item.url.toLowerCase().includes(query)
+        !item.originalUrl.toLowerCase().includes(query)
       ) {
         return false;
       }
@@ -50,7 +64,7 @@ export async function GET(request: NextRequest) {
       const query = search.toLowerCase();
       if (
         !item.title.toLowerCase().includes(query) &&
-        !item.url.toLowerCase().includes(query)
+        !item.originalUrl.toLowerCase().includes(query)
       ) {
         return false;
       }
