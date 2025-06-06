@@ -32,8 +32,9 @@ export const screenshotService = {
       params.append('search', search);
     }
 
-    // API 호출
-    const response = await fetch(`/api/screenshots?${params.toString()}`);
+    // API 호출 (절대 경로 사용)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/screenshots?${params.toString()}`);
 
     if (!response.ok) {
       throw new Error('스크린샷을 불러오는데 실패했습니다');
