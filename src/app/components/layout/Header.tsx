@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { FaCamera } from 'react-icons/fa';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import AuthButton from '../auth/AuthButton';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,12 +43,7 @@ export default function Header() {
             <Link href="/storage" className="text-gray-600 hover:text-blue-600">
               저장소
             </Link>
-            <Link
-              href="/auth/signin"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              로그인
-            </Link>
+            <AuthButton />
           </nav>
 
           {/* 모바일 메뉴 버튼 */}
@@ -98,12 +94,9 @@ export default function Header() {
               >
                 저장소
               </Link>
-              <Link
-                href="/auth/signin"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 inline-block text-center"
-              >
-                로그인
-              </Link>
+              <div className="text-center">
+                <AuthButton />
+              </div>
             </nav>
           </div>
         )}
