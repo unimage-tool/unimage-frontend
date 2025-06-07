@@ -2,15 +2,13 @@ import React from 'react';
 import Link from 'next/link';
 import { FaGoogle } from 'react-icons/fa';
 
-function getLoginUrl() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+async function getLoginUrl() {
   const redirectUrl = '/storage';
-  const fullRedirectUrl = `${baseUrl}${redirectUrl}`;
-  return `https://api.unimages.com/auth/login?redirectUrl=${encodeURIComponent(fullRedirectUrl)}`;
+  return `https://api.unimages.com/auth/login?redirectUrl=${encodeURIComponent(redirectUrl)}`;
 }
 
-export default function SignIn() {
-  const loginUrl = getLoginUrl();
+export default async function SignIn() {
+  const loginUrl = await getLoginUrl();
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -27,7 +25,7 @@ export default function SignIn() {
         <div className="mt-8 space-y-6">
           <Link
             href={loginUrl}
-            className="group relative w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="group relative w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-3">
               <FaGoogle className="h-5 w-5 text-gray-500" />
@@ -49,8 +47,8 @@ export default function SignIn() {
               <p className="text-center text-sm text-gray-600">
                 아직 계정이 없으신가요?{' '}
                 <Link
-                  href="/signup"
-                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                  href="#"
+                  className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   회원가입
                 </Link>
