@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { FaCloudUploadAlt, FaImage, FaLink, FaTimes } from 'react-icons/fa';
 
 interface UploadedImage {
@@ -11,10 +12,41 @@ interface UploadedImage {
 }
 
 export default function UploadPage() {
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const router = useRouter();
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadImage = async () => {
+    if (!uploadedImage) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadedImage.file);
+      if (uploadedImage.originalUrl) {
+        formData.append('originalUrl', uploadedImage.originalUrl);
+      }
+
+      const response = await fetch('https://api.unimages.com/images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('업로드 실패');
+      }
+
+      const data = await response.json();
+      router.push(`/${data.objectKey}`);
+    } catch (error) {
+      console.error('업로드 실패:', error);
+      alert('업로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // 클립보드에서 이미지 붙여넣기 처리
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -26,7 +58,7 @@ export default function UploadPage() {
       if (item.type.indexOf('image') !== -1) {
         const file = item.getAsFile();
         if (file) {
-          addImageFile(file);
+          handleImageFile(file);
         }
       }
     }
@@ -36,14 +68,12 @@ export default function UploadPage() {
   React.useEffect(() => {
     const handleGlobalPaste = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'v') {
-        // 입력 필드에 포커스가 있지 않을 때만 처리
         const activeElement = document.activeElement;
         if (
           activeElement?.tagName !== 'INPUT' &&
           activeElement?.tagName !== 'TEXTAREA'
         ) {
           e.preventDefault();
-          // 클립보드 데이터 읽기
           navigator.clipboard
             .read()
             .then((items) => {
@@ -56,7 +86,7 @@ export default function UploadPage() {
                         `clipboard-image-${Date.now()}.png`,
                         { type }
                       );
-                      addImageFile(file);
+                      handleImageFile(file);
                     });
                   }
                 }
@@ -73,7 +103,7 @@ export default function UploadPage() {
     return () => document.removeEventListener('keydown', handleGlobalPaste);
   }, []);
 
-  const addImageFile = (file: File) => {
+  const handleImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('이미지 파일만 업로드할 수 있습니다.');
       return;
@@ -82,15 +112,15 @@ export default function UploadPage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = e.target?.result as string;
-      setUploadedImages((prev) => [...prev, { file, preview }]);
+      setUploadedImage({ file, preview });
     };
     reader.readAsDataURL(file);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      Array.from(files).forEach(addImageFile);
+    if (files && files.length > 0) {
+      handleImageFile(files[0]);
     }
   };
 
@@ -110,53 +140,18 @@ export default function UploadPage() {
     setDragActive(false);
 
     const files = e.dataTransfer.files;
-    if (files) {
-      Array.from(files).forEach(addImageFile);
+    if (files && files.length > 0) {
+      handleImageFile(files[0]);
     }
   };
 
-  const removeImage = (index: number) => {
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  const removeImage = () => {
+    setUploadedImage(null);
   };
 
-  const updateOriginalUrl = (index: number, url: string) => {
-    setUploadedImages((prev) =>
-      prev.map((img, i) => (i === index ? { ...img, originalUrl: url } : img))
-    );
-  };
-
-  const handleUpload = async () => {
-    if (uploadedImages.length === 0) {
-      alert('업로드할 이미지를 선택해주세요.');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      // 여기에 실제 업로드 로직을 구현
-      // 예시: FormData를 사용한 업로드
-      for (const image of uploadedImages) {
-        const formData = new FormData();
-        formData.append('image', image.file);
-        if (image.originalUrl) {
-          formData.append('originalUrl', image.originalUrl);
-        }
-
-        // API 호출 예시 (실제 구현 시 screenshotService 사용)
-        console.log('업로드할 이미지:', {
-          fileName: image.file.name,
-          size: image.file.size,
-          originalUrl: image.originalUrl,
-        });
-      }
-
-      alert('이미지가 성공적으로 업로드되었습니다!');
-      setUploadedImages([]);
-    } catch (error) {
-      console.error('업로드 실패:', error);
-      alert('업로드에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setUploading(false);
+  const updateOriginalUrl = (url: string) => {
+    if (uploadedImage) {
+      setUploadedImage({ ...uploadedImage, originalUrl: url });
     }
   };
 
@@ -193,71 +188,59 @@ export default function UploadPage() {
         <input
           ref={fileInputRef}
           type="file"
-          multiple
           accept="image/*"
           onChange={handleFileSelect}
           className="hidden"
         />
       </div>
 
-      {/* 업로드된 이미지 목록 */}
-      {uploadedImages.length > 0 && (
+      {/* 업로드된 이미지 */}
+      {uploadedImage && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            업로드할 이미지 ({uploadedImages.length}개)
-          </h2>
-          <div className="space-y-4">
-            {uploadedImages.map((image, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-4 bg-white shadow-sm"
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 relative w-24 h-24">
-                    <Image
-                      src={image.preview}
-                      alt={`업로드 이미지 ${index + 1}`}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {image.file.name}
-                      </h3>
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                    <p className="text-sm text-gray-500 mb-3">
-                      크기: {(image.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <FaLink className="text-gray-400" />
-                      <input
-                        type="url"
-                        placeholder="원본 이미지 URL (선택사항)"
-                        value={image.originalUrl || ''}
-                        onChange={(e) =>
-                          updateOriginalUrl(index, e.target.value)
-                        }
-                        className="flex-grow border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
+          <h2 className="text-2xl font-semibold mb-4">업로드할 이미지</h2>
+          <div className="border rounded-lg p-4 bg-white shadow-sm">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0 relative w-24 h-24">
+                <Image
+                  src={uploadedImage.preview}
+                  alt="업로드 이미지"
+                  fill
+                  className="object-cover rounded-lg"
+                />
+              </div>
+              <div className="flex-grow">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-gray-900">
+                    {uploadedImage.file.name}
+                  </h3>
+                  <button
+                    onClick={removeImage}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mb-3">
+                  크기: {(uploadedImage.file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                <div className="flex items-center space-x-2">
+                  <FaLink className="text-gray-400" />
+                  <input
+                    type="url"
+                    placeholder="원본 이미지 URL (선택사항)"
+                    value={uploadedImage.originalUrl || ''}
+                    onChange={(e) => updateOriginalUrl(e.target.value)}
+                    className="flex-grow border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
-            ))}
+            </div>
           </div>
 
           {/* 업로드 버튼 */}
           <div className="mt-6 text-center">
             <button
-              onClick={handleUpload}
+              onClick={uploadImage}
               disabled={uploading}
               className={`px-8 py-3 rounded-lg font-semibold ${
                 uploading
@@ -265,7 +248,7 @@ export default function UploadPage() {
                   : 'bg-green-600 hover:bg-green-700'
               } text-white transition-colors`}
             >
-              {uploading ? '업로드 중...' : '모든 이미지 업로드'}
+              {uploading ? '업로드 중...' : '이미지 업로드'}
             </button>
           </div>
         </div>
