@@ -30,14 +30,20 @@ async function fetchScreenshotData(objectKey: string, cookie: string) {
   }
 }
 
-export default async function ScreenshotPage({
-  params,
-}: {
-  params: { screenshotId: string };
-}) {
+interface PageProps {
+  params: Promise<{
+    screenshotId: string;
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function ScreenshotPage({ params }: PageProps) {
+  // Next.js 15에서 params는 Promise이므로 await 필요
+  const resolvedParams = await params;
+  
   const headersList = await headers();
   const cookie = headersList.get('cookie') || '';
-  const screenshotData = await fetchScreenshotData(params.screenshotId, cookie);
+  const screenshotData = await fetchScreenshotData(resolvedParams.screenshotId, cookie);
 
   return (
     <div className={styles.ScreenshotPage}>
