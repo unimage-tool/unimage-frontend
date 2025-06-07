@@ -38,7 +38,7 @@ export default function UploadPage() {
         throw new Error('업로드 실패');
       }
 
-      const data = await response.json();
+      const { data } = await response.json();
       router.push(`/${data.objectKey}`);
     } catch (error) {
       console.error('업로드 실패:', error);
