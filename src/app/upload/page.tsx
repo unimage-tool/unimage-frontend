@@ -29,7 +29,7 @@ export default function UploadPage() {
         formData.append('originalUrl', uploadedImage.originalUrl);
       }
 
-      const response = await fetch('https://api.unimages.com/images', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
