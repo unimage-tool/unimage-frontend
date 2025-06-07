@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { FaGoogle } from 'react-icons/fa';
 
 export default function SignIn() {
-  // 실제 로그인 기능은 구현하지 않음
-  const handleGoogleSignIn = () => {
-    alert('구글 로그인 기능은 아직 구현되지 않았습니다.');
-  };
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const redirectUrl = '/storage';
+  const fullRedirectUrl = `${baseUrl}${redirectUrl}`;
+  const loginUrl = `https://api.unimages.com/auth/login?redirectUrl=${encodeURIComponent(fullRedirectUrl)}`;
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -23,15 +21,15 @@ export default function SignIn() {
         </div>
 
         <div className="mt-8 space-y-6">
-          <button
-            onClick={handleGoogleSignIn}
+          <Link
+            href={loginUrl}
             className="group relative w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-3">
               <FaGoogle className="h-5 w-5 text-gray-500" />
             </span>
             Google로 계속하기
-          </button>
+          </Link>
 
           <div className="mt-6">
             <div className="relative">
