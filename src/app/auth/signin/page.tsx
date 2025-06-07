@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FaGoogle } from 'react-icons/fa';
 
 async function getLoginUrl() {
-  const redirectUrl = '/storage';
+  const redirectUrl = 'https://unimages.com/storage';
   return `https://api.unimages.com/auth/login?redirectUrl=${encodeURIComponent(redirectUrl)}`;
 }
 
