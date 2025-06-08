@@ -3,56 +3,27 @@ import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import StorageClient from '../components/storage/StorageClient';
 
-async function getScreenshots({
-  page,
-  limit,
-  search,
-  sortBy,
-}: {
-  page: number;
-  limit: number;
-  search?: string;
-  sortBy: 'newest' | 'oldest' | 'title';
-}) {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    sortBy,
+export default async function StoragePage() {
+  const response = await fetch('https://api.unimages.com/images', {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
-
-  if (search) {
-    params.append('search', search);
-  }
-
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/screenshots?${params.toString()}`);
   
   if (!response.ok) {
-    throw new Error('스크린샷을 불러오는데 실패했습니다');
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-16">
+          <h3 className="text-xl font-semibold mb-2 text-red-600">스크린샷을 불러오는데 실패했습니다</h3>
+          <p className="text-gray-600">잠시 후 다시 시도해주세요.</p>
+        </div>
+      </div>
+    );
   }
 
-  return response.json();
-}
-
-export default async function StoragePage({ 
-  searchParams 
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  // Next.js 15에서 searchParams는 Promise이므로 await 필요
-  const resolvedSearchParams = await searchParams;
+  const data = await response.json();
   
-  const page = parseInt(resolvedSearchParams?.page as string || '1');
-  const limit = parseInt(resolvedSearchParams?.limit as string || '12');
-  const search = resolvedSearchParams?.search as string;
-  const sortBy = (resolvedSearchParams?.sortBy as 'newest' | 'oldest' | 'title') || 'newest';
-
-  const response = await getScreenshots({
-    page,
-    limit,
-    search,
-    sortBy,
-  });
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -66,7 +37,7 @@ export default async function StoragePage({
         </Link>
       </div>
 
-      <StorageClient initialData={response} />
+      <StorageClient initialData={data} />
     </div>
   );
 }

@@ -5,48 +5,32 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
 import FilterOptions from './FilterOptions';
-import Pagination from './Pagination';
-import { Screenshot } from '../../types/screenshot';
 
-interface StorageClientProps {
-  initialData: {
-    items: Screenshot[];
-    total: number;
-    page: number;
-    totalPages: number;
-  };
+interface Image {
+  originalUrl: string;
+  width: number;
+  height: number;
+  objectKey: string;
+  fileName: string;
+  size: number;
+  screenshot: string;
+  uploadedAt: string;
 }
 
-export default function StorageClient({ initialData }: StorageClientProps) {
+export default function StorageClient({ initialData }: { initialData: Image[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleSearch = (query: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('search', query);
-    params.set('page', '1');
     router.push(`/storage?${params.toString()}`);
   };
 
   const handleSortChange = (sort: 'newest' | 'oldest' | 'title') => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('sortBy', sort);
-    params.set('page', '1');
     router.push(`/storage?${params.toString()}`);
-  };
-
-  const handleItemsPerPageChange = (newLimit: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('limit', newLimit.toString());
-    params.set('page', '1');
-    router.push(`/storage?${params.toString()}`);
-  };
-
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    router.push(`/storage?${params.toString()}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -63,26 +47,12 @@ export default function StorageClient({ initialData }: StorageClientProps) {
       </div>
 
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-600">페이지당 표시:</span>
-          <select
-            value={searchParams.get('limit') || '12'}
-            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-            className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {[12, 24, 36, 48].map((option) => (
-              <option key={option} value={option}>
-                {option}개
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="text-gray-600">
-          총 {initialData.total}개의 스크린샷
+          총 {initialData.length}개의 스크린샷
         </div>
       </div>
 
-      {initialData.items.length === 0 ? (
+      {initialData.length === 0 ? (
         <div className="text-center py-16">
           <h3 className="text-xl font-semibold mb-2">검색 결과가 없습니다</h3>
           <p className="text-gray-600 mb-4">
@@ -90,17 +60,7 @@ export default function StorageClient({ initialData }: StorageClientProps) {
           </p>
         </div>
       ) : (
-        <>
-          <ImageGrid screenshots={initialData.items} />
-
-          <div className="mt-8">
-            <Pagination
-              currentPage={initialData.page}
-              totalPages={initialData.totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        </>
+        <ImageGrid screenshots={initialData} />
       )}
     </>
   );
