@@ -3,27 +3,10 @@ import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import StorageClient from '../components/storage/StorageClient';
 
-export default async function StoragePage() {
-  const response = await fetch('https://api.unimages.com/images', {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  
-  if (!response.ok) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <h3 className="text-xl font-semibold mb-2 text-red-600">스크린샷을 불러오는데 실패했습니다</h3>
-          <p className="text-gray-600">잠시 후 다시 시도해주세요.</p>
-        </div>
-      </div>
-    );
-  }
+// 동적 렌더링 강제
+export const dynamic = 'force-dynamic';
 
-  const data = await response.json();
-  
+export default function StoragePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -37,7 +20,7 @@ export default async function StoragePage() {
         </Link>
       </div>
 
-      <StorageClient initialData={data} />
+      <StorageClient />
     </div>
   );
 }

@@ -1,40 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  defaultValue?: string;
 }
 
-export default function SearchBar({ onSearch }: SearchBarProps) {
-  const [query, setQuery] = useState('');
-  
+export default function SearchBar({ onSearch, defaultValue = '' }: SearchBarProps) {
+  const [searchQuery, setSearchQuery] = useState(defaultValue);
+
+  useEffect(() => {
+    setSearchQuery(defaultValue);
+  }, [defaultValue]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query);
+    onSearch(searchQuery);
   };
-  
+
+  const handleClear = () => {
+    setSearchQuery('');
+    onSearch('');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div className="relative">
         <input
           type="text"
-          placeholder="제목, URL 또는 태그로 검색..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full py-3 pl-12 pr-4 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="파일명으로 검색..."
+          className="w-full px-4 py-3 pl-12 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-          <MagnifyingGlassIcon className="w-6 h-6 text-gray-400" />
-        </div>
+        <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <FaTimes />
+          </button>
+        )}
       </div>
-      <button
-        type="submit"
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-      >
-        검색
-      </button>
     </form>
   );
-} 
+}
