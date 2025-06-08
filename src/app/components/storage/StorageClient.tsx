@@ -7,6 +7,7 @@ import ImageGrid from './ImageGrid';
 import FilterOptions from './FilterOptions';
 
 interface Image {
+  id: string;
   originalUrl: string;
   width: number;
   height: number;
@@ -38,10 +39,8 @@ function StorageContent() {
         }
 
         const data = await response.json();
-        // API 응답에서 data 배열이 없는 경우 빈 배열로 처리
-        const imageData = Array.isArray(data) ? data : [];
-        setImages(imageData);
-        setFilteredImages(imageData);
+        setImages(data);
+        setFilteredImages(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다');
       } finally {

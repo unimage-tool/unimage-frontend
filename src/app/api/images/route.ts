@@ -9,9 +9,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const data = await response.json();
+    const result = await response.json();
     
-    return NextResponse.json(data);
+    if (!result.success) {
+      throw new Error(result.message || '이미지 목록을 불러오는데 실패했습니다');
+    }
+
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error('이미지 목록 조회 실패:', error);
     return NextResponse.json(
