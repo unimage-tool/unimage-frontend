@@ -5,18 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
 import FilterOptions from './FilterOptions';
-
-interface Image {
-  id: string;
-  originalUrl: string;
-  width: number;
-  height: number;
-  objectKey: string;
-  fileName: string;
-  size: number;
-  screenshot: string;
-  uploadedAt: string;
-}
+import { Image } from '../../types/image';
 
 function StorageContent() {
   const router = useRouter();

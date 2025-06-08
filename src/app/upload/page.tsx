@@ -39,7 +39,7 @@ export default function UploadPage() {
       }
 
       const { data } = await response.json();
-      router.push(`/${data.objectKey}`);
+      router.push(`/${data.id}`);
     } catch (error) {
       console.error('업로드 실패:', error);
       alert('업로드에 실패했습니다. 다시 시도해주세요.');
