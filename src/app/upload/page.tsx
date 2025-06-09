@@ -21,6 +21,12 @@ export default function UploadPage() {
   const uploadImage = async () => {
     if (!uploadedImage) return;
 
+    // 파일 크기 한번 더 확인
+    if (uploadedImage.file.size === 0) {
+      alert('파일이 비어있습니다.');
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
@@ -121,11 +127,11 @@ export default function UploadPage() {
       return;
     }
 
-    console.log('Selected file:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
+    // 파일 크기 확인
+    if (file.size === 0) {
+      alert('파일이 비어있습니다.');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
