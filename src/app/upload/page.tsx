@@ -21,30 +21,32 @@ export default function UploadPage() {
   const uploadImage = async () => {
     if (!uploadedImage) return;
   
-    // 파일 크기 확인
-    if (uploadedImage.file.size === 0) {
-      alert('파일이 비어있습니다.');
-      return;
-    }
-  
     setUploading(true);
     try {
+      // 1. 기본 검증
+      if (uploadedImage.file.size === 0) {
+        alert('파일이 비어있습니다.');
+        return;
+      }
+
+      // 2. FormData 생성 및 파일 추가 방식 개선
       const formData = new FormData();
       
-      // 파일을 직접 읽어서 새로운 File 객체 생성 (문제 해결 시도)
+      // 파일을 다시 읽어서 새로운 Blob/File 생성 (호환성 개선)
       const fileBuffer = await uploadedImage.file.arrayBuffer();
       
       if (fileBuffer.byteLength === 0) {
         throw new Error('파일이 비어있습니다.');
       }
-      
-      // 새로운 File 객체 생성
+
+      // Blob으로 먼저 생성 후 File로 변환
+      const blob = new Blob([fileBuffer], { type: uploadedImage.file.type });
       const newFile = new File(
-        [fileBuffer], 
-        uploadedImage.file.name, 
+        [blob], 
+        uploadedImage.file.name || `image-${Date.now()}.png`, 
         { 
-          type: uploadedImage.file.type,
-          lastModified: uploadedImage.file.lastModified 
+          type: uploadedImage.file.type || 'image/png',
+          lastModified: uploadedImage.file.lastModified || Date.now()
         }
       );
       
@@ -53,7 +55,7 @@ export default function UploadPage() {
       // originalUrl 처리
       const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name.replace(/\s+/g, '');
       formData.append('originalUrl', originalUrl);
-  
+
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -66,6 +68,7 @@ export default function UploadPage() {
           router.push('/auth/signin');
           return;
         }
+
         throw new Error(data.error || '업로드에 실패했습니다');
       }
   
