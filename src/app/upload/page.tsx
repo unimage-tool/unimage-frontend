@@ -25,9 +25,10 @@ export default function UploadPage() {
     try {
       const formData = new FormData();
       formData.append('file', uploadedImage.file);
-      if (uploadedImage.originalUrl) {
-        formData.append('originalUrl', uploadedImage.originalUrl);
-      }
+      
+      // originalUrl이 비어있을 경우 파일 이름을 자동으로 설정
+      const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name;
+      formData.append('originalUrl', originalUrl);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
