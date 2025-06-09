@@ -20,43 +20,59 @@ export default function UploadPage() {
 
   const uploadImage = async () => {
     if (!uploadedImage) return;
-
-    // 파일 크기 한번 더 확인
+  
+    // 파일 크기 확인
     if (uploadedImage.file.size === 0) {
       alert('파일이 비어있습니다.');
       return;
     }
-
+  
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('file', uploadedImage.file);
       
-      // originalUrl이 비어있을 경우 파일 이름을 자동으로 설정하고 공백 제거
+      // 파일을 직접 읽어서 새로운 File 객체 생성 (문제 해결 시도)
+      const fileBuffer = await uploadedImage.file.arrayBuffer();
+      
+      if (fileBuffer.byteLength === 0) {
+        throw new Error('파일이 비어있습니다.');
+      }
+      
+      // 새로운 File 객체 생성
+      const newFile = new File(
+        [fileBuffer], 
+        uploadedImage.file.name, 
+        { 
+          type: uploadedImage.file.type,
+          lastModified: uploadedImage.file.lastModified 
+        }
+      );
+      
+      formData.append('file', newFile);
+      
+      // originalUrl 처리
       const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name.replace(/\s+/g, '');
       formData.append('originalUrl', originalUrl);
-
+  
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         if (response.status === 401) {
           router.push('/auth/signin');
           return;
         }
-        // API 서버에서 받은 에러 메시지 사용
         throw new Error(data.error || '업로드에 실패했습니다');
       }
-
-      // 성공 응답 구조 확인
+  
       if (!data.data?.id) {
         throw new Error('서버 응답이 올바르지 않습니다');
       }
-
+  
       router.push(`/${data.data.id}`);
     } catch (error) {
       console.error('업로드 실패:', error);
