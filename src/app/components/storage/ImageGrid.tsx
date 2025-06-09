@@ -49,8 +49,9 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
         throw new Error(data.error || '삭제에 실패했습니다');
       }
 
-      // 삭제 성공 시 페이지 새로고침
-      router.refresh();
+      alert('이미지가 삭제되었습니다');
+      
+      router.push('/storage');
     } catch (error) {
       console.error('삭제 실패:', error);
       alert(error instanceof Error ? error.message : '삭제에 실패했습니다. 다시 시도해주세요.');
