@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import styles from './page.module.css';
 import ScreenshotViewer from './ScreenshotViewer';
 
@@ -26,7 +27,7 @@ async function fetchScreenshotData(objectKey: string, cookie: string) {
     };
   } catch (error) {
     console.error('스크린샷 데이터 로드 실패:', error);
-    throw error;
+    notFound();
   }
 }
 
@@ -43,11 +44,16 @@ export default async function ScreenshotPage({ params }: PageProps) {
   
   const headersList = await headers();
   const cookie = headersList.get('cookie') || '';
-  const screenshotData = await fetchScreenshotData(resolvedParams.screenshotId, cookie);
-
-  return (
-    <div className={styles.ScreenshotPage}>
-      <ScreenshotViewer {...screenshotData} />
-    </div>
-  );
+  
+  try {
+    const screenshotData = await fetchScreenshotData(resolvedParams.screenshotId, cookie);
+    return (
+      <div className={styles.ScreenshotPage}>
+        <ScreenshotViewer {...screenshotData} />
+      </div>
+    );
+  } catch (error) {
+    console.error('스크린샷 데이터 로드 실패:', error);
+    notFound();
+  }
 }
