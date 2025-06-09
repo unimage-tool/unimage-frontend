@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CalendarIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { Image as ImageType } from '../../types/image';
 
@@ -11,7 +12,9 @@ interface ImageGridProps {
 }
 
 export default function ImageGrid({ screenshots }: ImageGridProps) {
+  const router = useRouter();
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -26,6 +29,36 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
     setImageErrors(prev => new Set(prev).add(imageId));
   };
 
+  const handleDelete = async (imageId: string) => {
+    if (!confirm('정말로 이 이미지를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    setDeletingId(imageId);
+    try {
+      const response = await fetch(`/api/images/${imageId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        if (response.status === 401) {
+          router.push('/auth/signin');
+          return;
+        }
+        throw new Error(data.error || '삭제에 실패했습니다');
+      }
+
+      // 삭제 성공 시 페이지 새로고침
+      router.refresh();
+    } catch (error) {
+      console.error('삭제 실패:', error);
+      alert(error instanceof Error ? error.message : '삭제에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {screenshots.map((image) => (
@@ -36,7 +69,7 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
           <div className="relative h-48 w-full overflow-hidden bg-gray-100">
             {imageErrors.has(image.id) ? (
               // Fallback: 일반 img 태그 사용
-              <img
+              <Image
                 src={image.screenshot}
                 alt={image.fileName}
                 className="w-full h-full object-cover"
@@ -88,8 +121,16 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
             >
               상세보기
             </Link>
-            <button className="text-gray-500 hover:text-gray-700 text-sm">
-              삭제
+            <button
+              onClick={() => handleDelete(image.id)}
+              disabled={deletingId === image.id}
+              className={`text-sm ${
+                deletingId === image.id
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-red-600 hover:text-red-800'
+              }`}
+            >
+              {deletingId === image.id ? '삭제 중...' : '삭제'}
             </button>
           </div>
         </div>

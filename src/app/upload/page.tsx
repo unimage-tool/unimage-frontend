@@ -35,15 +35,26 @@ export default function UploadPage() {
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('업로드 실패');
+        if (response.status === 401) {
+          router.push('/auth/signin');
+          return;
+        }
+        // API 서버에서 받은 에러 메시지 사용
+        throw new Error(data.error || '업로드에 실패했습니다');
       }
 
-      const { data } = await response.json();
-      router.push(`/${data.id}`);
+      // 성공 응답 구조 확인
+      if (!data.data?.id) {
+        throw new Error('서버 응답이 올바르지 않습니다');
+      }
+
+      router.push(`/${data.data.id}`);
     } catch (error) {
       console.error('업로드 실패:', error);
-      alert('업로드에 실패했습니다. 다시 시도해주세요.');
+      alert(error instanceof Error ? error.message : '업로드에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setUploading(false);
     }
