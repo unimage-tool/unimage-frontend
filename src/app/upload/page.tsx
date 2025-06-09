@@ -26,8 +26,8 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append('file', uploadedImage.file);
       
-      // originalUrl이 비어있을 경우 파일 이름을 자동으로 설정
-      const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name;
+      // originalUrl이 비어있을 경우 파일 이름을 자동으로 설정하고 공백 제거
+      const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name.replace(/\s+/g, '');
       formData.append('originalUrl', originalUrl);
 
       const response = await fetch('/api/upload', {
@@ -120,6 +120,12 @@ export default function UploadPage() {
       alert('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
+
+    console.log('Selected file:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
 
     const reader = new FileReader();
     reader.onload = (e) => {
