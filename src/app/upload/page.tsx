@@ -21,41 +21,44 @@ export default function UploadPage() {
   const uploadImage = async () => {
     if (!uploadedImage) return;
   
+    if (uploadedImage.file.size === 0) {
+      alert('파일이 비어있습니다.');
+      return;
+    }
+  
     setUploading(true);
     try {
-      // 1. 기본 검증
-      if (uploadedImage.file.size === 0) {
-        alert('파일이 비어있습니다.');
-        return;
-      }
-
-      // 2. FormData 생성 및 파일 추가 방식 개선
       const formData = new FormData();
       
-      // 파일을 다시 읽어서 새로운 Blob/File 생성 (호환성 개선)
       const fileBuffer = await uploadedImage.file.arrayBuffer();
       
       if (fileBuffer.byteLength === 0) {
         throw new Error('파일이 비어있습니다.');
       }
+      
+      // --- 해결 지점 ---
+      // 1. 원본 파일에서 확장자를 추출합니다.
+      const originalName = uploadedImage.file.name;
+      const fileExtension = originalName.slice(((originalName.lastIndexOf(".") - 1) >>> 0) + 2);
+      
+      // 2. 타임스탬프와 영문을 조합하여 안전한 새 파일 이름을 생성합니다.
+      const safeFileName = `upload-${Date.now()}${fileExtension ? '.' + fileExtension : ''}`;
+      // --- 해결 지점 ---
 
-      // Blob으로 먼저 생성 후 File로 변환
-      const blob = new Blob([fileBuffer], { type: uploadedImage.file.type });
       const newFile = new File(
-        [blob], 
-        uploadedImage.file.name || `image-${Date.now()}.png`, 
+        [fileBuffer], 
+        safeFileName, // 3. 안전하게 생성된 새 파일 이름으로 File 객체를 생성합니다.
         { 
-          type: uploadedImage.file.type || 'image/png',
-          lastModified: uploadedImage.file.lastModified || Date.now()
+          type: uploadedImage.file.type,
+          lastModified: uploadedImage.file.lastModified 
         }
       );
       
       formData.append('file', newFile);
       
-      // originalUrl 처리
       const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name.replace(/\s+/g, '');
       formData.append('originalUrl', originalUrl);
-
+  
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -68,7 +71,6 @@ export default function UploadPage() {
           router.push('/auth/signin');
           return;
         }
-
         throw new Error(data.error || '업로드에 실패했습니다');
       }
   
