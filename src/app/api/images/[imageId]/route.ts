@@ -14,6 +14,12 @@ export async function DELETE(
       },
     });
 
+    // 204 No Content 또는 200 OK인 경우 성공으로 처리
+    if (response.status === 204 || response.ok) {
+      return new NextResponse(null, { status: 200 });
+    }
+
+    // 에러 응답이 있는 경우에만 JSON 파싱
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
