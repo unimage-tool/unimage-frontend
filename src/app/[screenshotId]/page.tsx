@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import styles from './page.module.css';
 import ScreenshotViewer from './ScreenshotViewer';
 
-async function fetchScreenshotData(objectKey: string, cookie: string) {
+async function fetchScreenshotData(id: string, cookie: string) {
   try {
-    const response = await fetch(`https://api.unimages.com/images/${objectKey}`, {
+    const response = await fetch(`https://api.unimages.com/images/${id}`, {
       headers: {
         'Cookie': cookie,
       },
@@ -17,12 +17,14 @@ async function fetchScreenshotData(objectKey: string, cookie: string) {
 
     const { data } = await response.json();
     return {
-      screenshot: data.screenshot,
+      id: data.id,
       originalUrl: data.originalUrl,
       widthPx: data.width,
       heightPx: data.height,
+      objectKey: data.objectKey,
       fileName: data.fileName,
       size: data.size,
+      screenshot: data.screenshot,
       uploadedAt: data.uploadedAt,
     };
   } catch (error) {
