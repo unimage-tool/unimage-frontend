@@ -9,19 +9,15 @@ export default function AuthButton() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const checkSession = () => {
-    // 더 정확한 세션 체크
-    const cookies = document.cookie.split(';');
-    const sessionCookie = cookies.find(cookie => 
-      cookie.trim().startsWith('session=')
-    );
-    
-    // 세션 쿠키가 존재하고 값이 있는지 확인
-    const hasValidSession = sessionCookie && 
-      sessionCookie.split('=')[1] && 
-      sessionCookie.split('=')[1].trim() !== '';
-    
-    setIsLoggedIn(!!hasValidSession);
+  const checkSession = async () => {
+    try {
+      const response = await fetch('/api/auth/check');
+      const data = await response.json();
+      setIsLoggedIn(data.authenticated);
+    } catch (error) {
+      console.error('세션 확인 실패:', error);
+      setIsLoggedIn(false);
+    }
   };
 
   useEffect(() => {
@@ -32,49 +28,25 @@ export default function AuthButton() {
     const handleFocus = () => checkSession();
     window.addEventListener('focus', handleFocus);
 
-    // 주기적으로 세션 상태 확인 (선택적)
-    const interval = setInterval(checkSession, 30000); // 30초마다
-
     return () => {
       window.removeEventListener('focus', handleFocus);
-      clearInterval(interval);
     };
-  }, []);
-
-  // 쿠키 변경을 감지하는 더 효율적인 방법
-  useEffect(() => {
-    const originalDocumentCookie = document.cookie;
-    
-    const checkCookieChanges = () => {
-      if (document.cookie !== originalDocumentCookie) {
-        checkSession();
-      }
-    };
-
-    const interval = setInterval(checkCookieChanges, 1000); // 1초마다 체크
-    
-    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = async () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('https://api.unimages.com/auth/session-logout', {
+      const response = await fetch('/api/auth/logout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // 쿠키 자동 전송
       });
       
       if (response.ok) {
-        // 쿠키 클리어 (브라우저에서도 제거)
-        document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         setIsLoggedIn(false);
         router.push('/');
       } else {
-        throw new Error('로그아웃 요청 실패');
+        const data = await response.json();
+        throw new Error(data.error || '로그아웃 요청 실패');
       }
     } catch (error) {
       console.error('로그아웃 실패:', error);
