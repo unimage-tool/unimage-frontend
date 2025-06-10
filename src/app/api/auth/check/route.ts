@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch('https://api.unimages.com/auth/check', {
+      credentials: 'include',
       headers: {
         'Cookie': request.headers.get('cookie') || '',
       },
