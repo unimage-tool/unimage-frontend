@@ -20,7 +20,6 @@ export default function AuthButton() {
       }
 
       const data = await response.json();
-      console.log('인증 상태:', data); // 디버깅용
       setIsLoggedIn(data.authenticated);
     } catch (error) {
       console.error('세션 확인 실패:', error);

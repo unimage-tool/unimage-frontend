@@ -9,6 +9,28 @@ import AuthButton from '../auth/AuthButton';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const navLinks = [
+    { href: '/#features', label: '기능' },
+    { href: '/#how-it-works', label: '사용 방법' },
+    { href: '/pricing', label: '요금제' },
+    { href: '/upload', label: '업로드' },
+    { href: '/', label: '저장소' },
+  ];
+
+  const renderLinks = (links: { href: string; label: string }[]) => (
+    <>
+      {links.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="text-gray-600 hover:text-blue-600"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </>
+  );
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="container mx-auto px-4">
@@ -22,27 +44,7 @@ export default function Header() {
 
           {/* 데스크톱 메뉴 */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/#features"
-              className="text-gray-600 hover:text-blue-600"
-            >
-              기능
-            </Link>
-            <Link
-              href="/#how-it-works"
-              className="text-gray-600 hover:text-blue-600"
-            >
-              사용 방법
-            </Link>
-            <Link href="/pricing" className="text-gray-600 hover:text-blue-600">
-              요금제
-            </Link>
-            <Link href="/upload" className="text-gray-600 hover:text-blue-600">
-              업로드
-            </Link>
-            <Link href="/storage" className="text-gray-600 hover:text-blue-600">
-              저장소
-            </Link>
+            {renderLinks(navLinks)}
             <AuthButton />
           </nav>
 
@@ -64,36 +66,7 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <nav className="flex flex-col space-y-4">
-              <Link
-                href="/#features"
-                className="text-gray-600 hover:text-blue-600"
-              >
-                기능
-              </Link>
-              <Link
-                href="/#how-it-works"
-                className="text-gray-600 hover:text-blue-600"
-              >
-                사용 방법
-              </Link>
-              <Link
-                href="/pricing"
-                className="text-gray-600 hover:text-blue-600"
-              >
-                요금제
-              </Link>
-              <Link
-                href="/upload"
-                className="text-gray-600 hover:text-blue-600"
-              >
-                업로드
-              </Link>
-              <Link
-                href="/storage"
-                className="text-gray-600 hover:text-blue-600"
-              >
-                저장소
-              </Link>
+              {renderLinks(navLinks)}
               <div className="text-center">
                 <AuthButton />
               </div>
