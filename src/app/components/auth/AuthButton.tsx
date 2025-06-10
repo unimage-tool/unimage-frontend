@@ -29,23 +29,16 @@ export default function AuthButton() {
   };
 
   useEffect(() => {
-    // 초기 체크
     checkSession();
-
-    // 페이지 포커스 시 세션 재확인
+    
     const handleFocus = () => checkSession();
     window.addEventListener('focus', handleFocus);
-
-    // 페이지 언로드 시 세션 확인
-    const handleBeforeUnload = () => checkSession();
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
+    
     return () => {
       window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
-
+  
   const handleLogout = async () => {
     setIsLoading(true);
     
