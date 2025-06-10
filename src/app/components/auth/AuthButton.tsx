@@ -11,8 +11,16 @@ export default function AuthButton() {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/check');
+      const response = await fetch('/api/auth/check', {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('인증 상태 확인 실패');
+      }
+
       const data = await response.json();
+      console.log('인증 상태:', data); // 디버깅용
       setIsLoggedIn(data.authenticated);
     } catch (error) {
       console.error('세션 확인 실패:', error);
@@ -28,8 +36,13 @@ export default function AuthButton() {
     const handleFocus = () => checkSession();
     window.addEventListener('focus', handleFocus);
 
+    // 페이지 언로드 시 세션 확인
+    const handleBeforeUnload = () => checkSession();
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
@@ -39,6 +52,7 @@ export default function AuthButton() {
     try {
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include',
       });
       
       if (response.ok) {

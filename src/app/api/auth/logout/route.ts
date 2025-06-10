@@ -4,6 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const response = await fetch('https://api.unimages.com/auth/session-logout', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'Cookie': request.headers.get('cookie') || '',
