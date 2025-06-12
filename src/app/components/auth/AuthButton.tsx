@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function AuthButton() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 초기 로딩 상태
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const checkSession = async () => {
     try {
@@ -20,10 +22,24 @@ export default function AuthButton() {
       }
 
       const data = await response.json();
-      setIsLoggedIn(data.authenticated);
+      const authenticated = data.authenticated;
+      setIsLoggedIn(authenticated);
+      
+      // 루트 페이지에서 인증되지 않은 경우 리다이렉트
+      if (pathname === '/' && !authenticated) {
+        router.push('/about');
+      }
+      
     } catch (error) {
       console.error('세션 확인 실패:', error);
       setIsLoggedIn(false);
+      
+      // 루트 페이지에서 오류 발생 시 리다이렉트
+      if (pathname === '/') {
+        router.push('/about');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,10 +52,10 @@ export default function AuthButton() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [pathname]);
   
   const handleLogout = async () => {
-    setIsLoading(true);
+    setIsButtonLoading(true);
     
     try {
       const response = await fetch('/api/auth/logout', {
@@ -49,7 +65,7 @@ export default function AuthButton() {
       
       if (response.ok) {
         setIsLoggedIn(false);
-        router.push('/');
+        router.push('/about'); // 로그아웃 후 about 페이지로
       } else {
         const data = await response.json();
         throw new Error(data.error || '로그아웃 요청 실패');
@@ -58,22 +74,29 @@ export default function AuthButton() {
       console.error('로그아웃 실패:', error);
       alert('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
-      setIsLoading(false);
+      setIsButtonLoading(false);
     }
   };
+
+  // 초기 로딩 중에는 빈 상태 표시
+  if (isLoading) {
+    return (
+      <div className="w-20 h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+    );
+  }
 
   if (isLoggedIn) {
     return (
       <button
         onClick={handleLogout}
-        disabled={isLoading}
+        disabled={isButtonLoading}
         className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-          isLoading 
+          isButtonLoading 
             ? 'bg-gray-400 cursor-not-allowed' 
             : 'bg-red-600 hover:bg-red-700'
         }`}
       >
-        {isLoading ? '로그아웃 중...' : '로그아웃'}
+        {isButtonLoading ? '로그아웃 중...' : '로그아웃'}
       </button>
     );
   }
