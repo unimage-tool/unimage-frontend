@@ -52,7 +52,7 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
               <Image
                 src={
                   imageErrors.has(image.id)
-                    ? '/fallback.png' // ❗ fallback 이미지 경로 필요
+                    ? 'https://placehold.co/600x400?text=No Image'
                     : image.screenshot
                 }
                 alt={`Screenshot of ${image.fileName}`}
