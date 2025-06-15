@@ -15,10 +15,12 @@ type Sizing = 'image' | 'screen';
 export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, heightPx }: Props) {
   const [sizing, setSizing] = useState<Sizing>('image');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -26,11 +28,18 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
     const img = new Image();
     img.src = screenshot;
     img.onload = () => {
-      canvas.width = widthPx;
-      canvas.height = heightPx;
-      ctx.drawImage(img, 0, 0, widthPx, heightPx);
+      if (sizing === 'image') {
+        canvas.width = widthPx;
+        canvas.height = heightPx;
+      } else {
+        const containerWidth = container.clientWidth;
+        const scale = containerWidth / widthPx;
+        canvas.width = containerWidth;
+        canvas.height = heightPx * scale;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
-  }, [screenshot, widthPx, heightPx]);
+  }, [screenshot, widthPx, heightPx, sizing]);
 
   return (
     <>
@@ -44,7 +53,9 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
         </div>
       </div>
       <ImageContainer sizing={sizing} widthPx={widthPx} heightPx={heightPx}>
-        <canvas ref={canvasRef} />
+        <div ref={containerRef} className={styles.CanvasContainer}>
+          <canvas ref={canvasRef} />
+        </div>
       </ImageContainer>
     </>
   );
@@ -59,6 +70,7 @@ function ImageContainer({ sizing, widthPx, heightPx, children }
     style.width = `${widthPx}px`;
     style.height = `${heightPx}px`;
   } else {
+    style.width = '100%';
     style.aspectRatio = `${widthPx / heightPx}`;
   }
 
