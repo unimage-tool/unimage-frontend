@@ -3,19 +3,16 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { CalendarIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { LinkIcon } from '@heroicons/react/24/outline';
 import { Image as ImageType } from '../../types/image';
 
 interface ImageGridProps {
   screenshots: ImageType[];
-  onImageDelete: (imageId: string) => void; // 삭제 콜백 추가
 }
 
-export default function ImageGrid({ screenshots, onImageDelete }: ImageGridProps) {
-  const router = useRouter();
+export default function ImageGrid({ screenshots }: ImageGridProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [hoveredUrl, setHoveredUrl] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -30,112 +27,84 @@ export default function ImageGrid({ screenshots, onImageDelete }: ImageGridProps
     setImageErrors(prev => new Set(prev).add(imageId));
   };
 
-  const handleDelete = async (imageId: string) => {
-    if (!confirm('정말로 이 이미지를 삭제하시겠습니까?')) {
-      return;
-    }
-
-    setDeletingId(imageId);
-    try {
-      const response = await fetch(`/api/images/${imageId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        if (response.status === 401) {
-          router.push('/auth/signin');
-          return;
-        }
-        throw new Error(data.error || '삭제에 실패했습니다');
-      }
-
-      // 성공 시 상위 컴포넌트에 삭제된 이미지 ID 전달
-      onImageDelete(imageId);
-      alert('이미지가 삭제되었습니다');
-      
-    } catch (error) {
-      console.error('삭제 실패:', error);
-      alert(error instanceof Error ? error.message : '삭제에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {screenshots.map((image) => (
         <div
           key={image.id}
-          className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+          className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 relative"
         >
-          <div className="relative h-48 w-full overflow-hidden bg-gray-100">
-            {imageErrors.has(image.id) ? (
-              // Fallback: 일반 img 태그 사용
-              <Image
-                src={image.screenshot}
-                alt={image.fileName}
-                className="w-full h-full object-cover"
-                onError={() => {
-                  console.error(`Failed to load image: ${image.screenshot}`);
-                }}
-              />
-            ) : (
-              <Image
-                src={image.screenshot}
-                alt={image.fileName}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                onError={() => handleImageError(image.id)}
-                unoptimized={true} // S3 presigned URL의 경우 최적화 비활성화
-              />
-            )}
-          </div>
+          {/* 이미지 영역 */}
+          <Link href={`/${image.id}`} className="block relative">
+            <div className="relative h-48 w-full overflow-hidden">
+              {imageErrors.has(image.id) ? (
+                <Image
+                  src={image.screenshot}
+                  alt={image.fileName}
+                  width={image.width}
+                  height={image.height}
+                  className="w-full h-full object-cover"
+                  onError={() => {
+                    console.error(`Failed to load image: ${image.screenshot}`);
+                  }}
+                />
+              ) : (
+                <Image
+                  src={image.screenshot}
+                  alt={image.fileName}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  onError={() => handleImageError(image.id)}
+                  unoptimized={true}
+                />
+              )}
 
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-2 truncate">
-              {image.fileName}
-            </h3>
+              {/* 항상 보이는 오버레이 */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  <div className="flex items-center justify-between text-sm">
+                    <h3 className="text-lg font-semibold mb-1 truncate">{image.fileName}</h3>
+                    <span>{formatDate(image.uploadedAt)}</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="flex items-center text-sm text-gray-500 mb-2">
-              <CalendarIcon className="w-4 h-4 mr-1" />
-              <span>{formatDate(image.uploadedAt)}</span>
+              {/* URL 링크 버튼 - 이미지 위에 위치 */}
+              <div className="absolute top-2 right-2">
+                <div
+                  className="relative group/url"
+                  onMouseEnter={() => setHoveredUrl(image.id)}
+                  onMouseLeave={() => setHoveredUrl(null)}
+                >
+                  <button
+                    className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all duration-300 cursor-pointer"
+                  >
+                    <LinkIcon className="w-4 h-4 text-white" />
+                  </button>
+
+                  {/* 호버 시 확장되는 URL 캡슐 */}
+                  <div onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(image.originalUrl, '_blank', 'noopener,noreferrer');
+                  }} className={`absolute top-0 right-0 bg-black/80 backdrop-blur-sm rounded-full transition-all duration-300 overflow-hidden ${hoveredUrl === image.id
+                    ? 'w-64 opacity-100'
+                    : 'w-10 opacity-0'
+                    }`}>
+                    <div className="flex items-center h-10">
+                      <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                        <LinkIcon className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="px-3 pr-4 text-white text-sm truncate">
+                        {image.originalUrl}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="flex items-center text-sm text-gray-500 mb-3">
-              <LinkIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-              <a
-                href={image.originalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="truncate hover:text-blue-500"
-                title={image.originalUrl}
-              >
-                {image.originalUrl}
-              </a>
-            </div>
-          </div>
-
-          <div className="px-4 py-3 bg-gray-50 flex justify-between items-center">
-            <Link
-              href={`/${image.id}`}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              상세보기
-            </Link>
-            <button
-              onClick={() => handleDelete(image.id)}
-              disabled={deletingId === image.id}
-              className={`text-sm ${
-                deletingId === image.id
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-red-600 hover:text-red-800'
-              }`}
-            >
-              {deletingId === image.id ? '삭제 중...' : '삭제'}
-            </button>
-          </div>
+          </Link>
         </div>
       ))}
     </div>
