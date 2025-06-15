@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -11,7 +11,7 @@ export default function AuthButton() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/check', {
         credentials: 'include',
@@ -41,7 +41,7 @@ export default function AuthButton() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pathname, router]);
 
   useEffect(() => {
     checkSession();
@@ -52,7 +52,7 @@ export default function AuthButton() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [pathname]);
+  }, [checkSession]);
   
   const handleLogout = async () => {
     setIsButtonLoading(true);
