@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { CSSProperties, PropsWithChildren, useState } from 'react';
+import { CSSProperties, PropsWithChildren, useEffect, useRef, useState } from 'react';
 import styles from './ScreenshotViewer.module.css';
 
 interface Props {
@@ -15,6 +14,23 @@ type Sizing = 'image' | 'screen';
 
 export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, heightPx }: Props) {
   const [sizing, setSizing] = useState<Sizing>('image');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.src = screenshot;
+    img.onload = () => {
+      canvas.width = widthPx;
+      canvas.height = heightPx;
+      ctx.drawImage(img, 0, 0, widthPx, heightPx);
+    };
+  }, [screenshot, widthPx, heightPx]);
 
   return (
     <>
@@ -28,7 +44,7 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
         </div>
       </div>
       <ImageContainer sizing={sizing} widthPx={widthPx} heightPx={heightPx}>
-        <Image src={screenshot} alt={originalUrl} fill />
+        <canvas ref={canvasRef} />
       </ImageContainer>
     </>
   );
