@@ -71,11 +71,6 @@ function StorageContent() {
     setFilteredImages(filtered);
   }, [images, searchParams]);
 
-  // 이미지 삭제 핸들러 추가
-  const handleImageDelete = (deletedImageId: string) => {
-    setImages(prevImages => prevImages.filter(image => image.id !== deletedImageId));
-  };
-
   const handleSearch = (query: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (query.trim()) {
@@ -152,7 +147,6 @@ function StorageContent() {
       ) : (
         <ImageGrid 
           screenshots={filteredImages} 
-          onImageDelete={handleImageDelete}
         />
       )}
     </>
