@@ -10,11 +10,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '/', label: '저장소' },
     { href: '/about/#features', label: '기능' },
     { href: '/about/#how-it-works', label: '사용 방법' },
     { href: '/pricing', label: '요금제' },
-    { href: '/upload', label: '업로드' },
   ];
 
   const renderLinks = (links: { href: string; label: string }[]) => (
