@@ -12,7 +12,6 @@ interface ImageGridProps {
 
 export default function ImageGrid({ screenshots }: ImageGridProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [hoveredUrls, setHoveredUrls] = useState<Set<string>>(new Set());
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -27,18 +26,6 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
     setImageErrors((prev) => new Set(prev).add(imageId));
   };
 
-  const handleMouseEnter = (id: string) => {
-    setHoveredUrls((prev) => new Set(prev).add(id));
-  };
-
-  const handleMouseLeave = (id: string) => {
-    setHoveredUrls((prev) => {
-      const copy = new Set(prev);
-      copy.delete(id);
-      return copy;
-    });
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {screenshots.map((image) => (
@@ -46,7 +33,6 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
           key={image.id}
           className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 relative"
         >
-          {/* 이미지 링크 */}
           <Link href={`/${image.id}`} className="block relative">
             <div className="relative aspect-[3/2] w-full overflow-hidden">
               <Image
@@ -63,7 +49,6 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
                 unoptimized
               />
 
-              {/* 그라디언트 오버레이 */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                   <div className="flex items-center justify-between text-sm">
@@ -79,41 +64,25 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
                   </div>
                 </div>
               </div>
-
-              {/* 링크 버튼 */}
-              <div
-                className="absolute top-2 right-2 z-10"
-                onClick={(e) => e.stopPropagation()}
-                onMouseEnter={() => handleMouseEnter(image.id)}
-                onMouseLeave={() => handleMouseLeave(image.id)}
-              >
-                <div className="relative group/url">
-                  <button
-                    className={`p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all duration-300 cursor-pointer ${
-                      hoveredUrls.has(image.id) ? 'opacity-0' : ''
-                    }`}
-                  >
+              <div className="absolute top-2 right-2 z-10">
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(image.originalUrl, '_blank', 'noopener,noreferrer');
+                  }}
+                  // 링크 버튼과 URL 영역을 새로운 group으로 지정 (group/url)
+                  className="group/url flex items-center h-10 bg-black/50 backdrop-blur-sm rounded-full transition-all duration-300 ease-in-out cursor-pointer"
+                >
+                  {/* 아이콘 영역 */}
+                  <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
                     <LinkIcon className="w-4 h-4 text-white" />
-                  </button>
-
-                  {/* URL 확장 영역 */}
-                  <div
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      window.open(image.originalUrl, '_blank', 'noopener,noreferrer');
-                    }}
-                    className={`absolute top-0 right-0 bg-black/50 backdrop-blur-sm rounded-full transition-all duration-300 overflow-hidden ${
-                      hoveredUrls.has(image.id) ? 'w-64 opacity-100' : 'w-10 opacity-0'
-                    }`}
-                  >
-                    <div className="flex items-center h-10">
-                      <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                        <LinkIcon className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="pr-4 text-white text-sm truncate">
-                        {image.originalUrl}
-                      </div>
+                  </div>
+                  
+                  {/* URL 텍스트 컨테이너 */}
+                  <div className="max-w-0 group-hover/url:max-w-[28rem] md:group-hover/url:max-w-[16rem] transition-all duration-300 ease-in-out overflow-hidden">
+                    <div className="pr-4 text-white text-sm whitespace-nowrap truncate">
+                      {image.originalUrl}
                     </div>
                   </div>
                 </div>
