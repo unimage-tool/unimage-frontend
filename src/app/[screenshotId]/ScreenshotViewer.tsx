@@ -17,7 +17,7 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const updateCanvasSize = () => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -39,6 +39,17 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
       }
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
+  };
+
+  useEffect(() => {
+    updateCanvasSize();
+    
+    const handleResize = () => {
+      updateCanvasSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [screenshot, widthPx, heightPx, sizing]);
 
   return (
@@ -63,19 +74,37 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
 
 function ImageContainer({ sizing, widthPx, heightPx, children }
   : PropsWithChildren<{ sizing: Sizing, widthPx: number, heightPx: number }>) {
+  const [containerStyle, setContainerStyle] = useState<CSSProperties>({
+    maxWidth: '100%',
+    overflow: 'auto'
+  });
 
-  const style: CSSProperties = {};
+  useEffect(() => {
+    const updateContainerStyle = () => {
+      if (sizing === 'image') {
+        setContainerStyle({
+          maxWidth: '100%',
+          overflow: 'auto',
+          width: `${widthPx}px`,
+          height: `${heightPx}px`
+        });
+      } else {
+        setContainerStyle({
+          maxWidth: '100%',
+          overflow: 'hidden',
+          width: '100%',
+          aspectRatio: `${widthPx / heightPx}`
+        });
+      }
+    };
 
-  if (sizing === 'image') {
-    style.width = `${widthPx}px`;
-    style.height = `${heightPx}px`;
-  } else {
-    style.width = '100%';
-    style.aspectRatio = `${widthPx / heightPx}`;
-  }
+    updateContainerStyle();
+    window.addEventListener('resize', updateContainerStyle);
+    return () => window.removeEventListener('resize', updateContainerStyle);
+  }, [sizing, widthPx, heightPx]);
 
   return (
-    <div className={styles.ImageContainer} style={style}>
+    <div className={styles.ImageContainer} style={containerStyle}>
       {children}
     </div>
   );
