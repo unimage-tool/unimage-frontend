@@ -44,7 +44,7 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
-    } catch (err) {
+    } catch {
       setError('이미지 렌더링 중 오류가 발생했습니다.');
     }
   }, [sizing, widthPx, heightPx]);
