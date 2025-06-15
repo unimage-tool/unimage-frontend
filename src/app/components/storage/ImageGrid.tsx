@@ -12,7 +12,7 @@ interface ImageGridProps {
 
 export default function ImageGrid({ screenshots }: ImageGridProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [hoveredUrl, setHoveredUrl] = useState<string | null>(null);
+  const [hoveredUrls, setHoveredUrls] = useState<Set<string>>(new Set());
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -24,7 +24,19 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
   };
 
   const handleImageError = (imageId: string) => {
-    setImageErrors(prev => new Set(prev).add(imageId));
+    setImageErrors((prev) => new Set(prev).add(imageId));
+  };
+
+  const handleMouseEnter = (id: string) => {
+    setHoveredUrls((prev) => new Set(prev).add(id));
+  };
+
+  const handleMouseLeave = (id: string) => {
+    setHoveredUrls((prev) => {
+      const copy = new Set(prev);
+      copy.delete(id);
+      return copy;
+    });
   };
 
   return (
@@ -34,69 +46,72 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
           key={image.id}
           className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 relative"
         >
-          {/* 이미지 영역 */}
+          {/* 이미지 링크 */}
           <Link href={`/${image.id}`} className="block relative">
-            <div className="relative h-48 w-full overflow-hidden">
-              {imageErrors.has(image.id) ? (
-                <Image
-                  src={image.screenshot}
-                  alt={image.fileName}
-                  width={image.width}
-                  height={image.height}
-                  className="w-full h-full object-cover"
-                  onError={() => {
-                    console.error(`Failed to load image: ${image.screenshot}`);
-                  }}
-                />
-              ) : (
-                <Image
-                  src={image.screenshot}
-                  alt={image.fileName}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  onError={() => handleImageError(image.id)}
-                  unoptimized={true}
-                />
-              )}
+            <div className="relative aspect-[3/2] w-full overflow-hidden">
+              <Image
+                src={
+                  imageErrors.has(image.id)
+                    ? 'https://placehold.co/600x400?text=No Image'
+                    : image.screenshot
+                }
+                alt={`Screenshot of ${image.fileName}`}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                onError={() => handleImageError(image.id)}
+                unoptimized
+              />
 
-              {/* 항상 보이는 오버레이 */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+              {/* 그라디언트 오버레이 */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                   <div className="flex items-center justify-between text-sm">
-                    <h3 className="text-lg font-semibold mb-1 truncate">{image.fileName}</h3>
-                    <span>{formatDate(image.uploadedAt)}</span>
+                    <h3
+                      className="text-lg font-semibold mb-1 truncate"
+                      title={image.fileName}
+                    >
+                      {image.fileName}
+                    </h3>
+                    <span className="whitespace-nowrap">
+                      {formatDate(image.uploadedAt)}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* URL 링크 버튼 - 이미지 위에 위치 */}
-              <div className="absolute top-2 right-2">
-                <div
-                  className="relative group/url"
-                  onMouseEnter={() => setHoveredUrl(image.id)}
-                  onMouseLeave={() => setHoveredUrl(null)}
-                >
+              {/* 링크 버튼 */}
+              <div
+                className="absolute top-2 right-2 z-10"
+                onClick={(e) => e.stopPropagation()}
+                onMouseEnter={() => handleMouseEnter(image.id)}
+                onMouseLeave={() => handleMouseLeave(image.id)}
+              >
+                <div className="relative group/url">
                   <button
-                    className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all duration-300 cursor-pointer"
+                    className={`p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all duration-300 cursor-pointer ${
+                      hoveredUrls.has(image.id) ? 'opacity-0' : ''
+                    }`}
                   >
                     <LinkIcon className="w-4 h-4 text-white" />
                   </button>
 
-                  {/* 호버 시 확장되는 URL 캡슐 */}
-                  <div onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.open(image.originalUrl, '_blank', 'noopener,noreferrer');
-                  }} className={`absolute top-0 right-0 bg-black/80 backdrop-blur-sm rounded-full transition-all duration-300 overflow-hidden ${hoveredUrl === image.id
-                    ? 'w-64 opacity-100'
-                    : 'w-10 opacity-0'
-                    }`}>
+                  {/* URL 확장 영역 */}
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(image.originalUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                    className={`absolute top-0 right-0 bg-black/50 backdrop-blur-sm rounded-full transition-all duration-300 overflow-hidden ${
+                      hoveredUrls.has(image.id) ? 'w-64 opacity-100' : 'w-10 opacity-0'
+                    }`}
+                  >
                     <div className="flex items-center h-10">
                       <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
                         <LinkIcon className="w-4 h-4 text-white" />
                       </div>
-                      <div className="px-3 pr-4 text-white text-sm truncate">
+                      <div className="pr-4 text-white text-sm truncate">
                         {image.originalUrl}
                       </div>
                     </div>
