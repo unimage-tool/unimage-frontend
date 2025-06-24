@@ -8,4 +8,6 @@ export interface Image {
   size: number;
   screenshot: string;
   uploadedAt: string;
+  thumbnailUrl: string;
+  elements: string;
 } 

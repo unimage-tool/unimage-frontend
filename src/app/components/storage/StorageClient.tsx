@@ -78,13 +78,13 @@ function StorageContent() {
     } else {
       params.delete('search');
     }
-    router.push(`/storage?${params.toString()}`);
+    router.push(`/?${params.toString()}`);
   };
 
   const handleSortChange = (sort: 'newest' | 'oldest' | 'title') => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('sortBy', sort);
-    router.push(`/storage?${params.toString()}`);
+    router.push(`/?${params.toString()}`);
   };
 
   if (isLoading) {
