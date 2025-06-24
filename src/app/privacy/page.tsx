@@ -5,7 +5,7 @@ const PrivacyPage = () => {
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl md:text-4xl font-bold mb-8 text-gray-900">개인정보 처리방침</h1>
       <section className="text-base md:text-lg leading-relaxed text-gray-800">
-        <p className="mb-8">UnImage(이하 "회사")는 이용자의 개인정보를 소중하게 생각하며, 관련 법령을 준수합니다. 본 개인정보 처리방침은 회사가 제공하는 서비스 이용 시, 이용자의 개인정보가 어떻게 수집·이용·보관·파기되는지에 대해 안내합니다.</p>
+        <p className="mb-8">UnImage(이하 &quot;회사&quot;)는 이용자의 개인정보를 소중하게 생각하며, 관련 법령을 준수합니다. 본 개인정보 처리방침은 회사가 제공하는 서비스 이용 시, 이용자의 개인정보가 어떻게 수집·이용·보관·파기되는지에 대해 안내합니다.</p>
 
         <h2 className="text-xl font-semibold mt-10 mb-3 text-gray-900">1. 수집하는 개인정보 항목</h2>
         <ul className="list-disc pl-6 mb-8 space-y-1">

@@ -1,6 +1,7 @@
 .Header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
 }
 
 .OriginalUrl {
@@ -36,4 +37,34 @@
   background-color: #ffebee;
   border: 1px solid #ffcdd2;
   border-radius: 4px;
+}
+
+.Toolbar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 4px;
+}
+
+.Toolbar button {
+  padding: 6px 14px;
+  border: 1px solid #bbb;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s, border 0.15s;
+}
+
+.Toolbar button:hover {
+  background: #f0f0f0;
+  border-color: #888;
+}
+
+@media (max-width: 48rem) {
+  .Toolbar button {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+  }
 }
