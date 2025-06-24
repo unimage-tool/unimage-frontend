@@ -11,6 +11,37 @@ interface UploadedImage {
   originalUrl?: string;
 }
 
+function dataURLtoBlob(dataUrl: string): Blob {
+  const [header, base64Data] = dataUrl.split(',');
+  if (!base64Data) throw new Error('잘못된 dataURL입니다.');
+  const mimeMatch = header.match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mime });
+}
+
+function generateThumbnail(dataUrl: string, width: number, height: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('2d context를 얻을 수 없습니다.'));
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = (err) => reject(err);
+    img.src = dataUrl;
+  });
+}
+
 export default function UploadPage() {
   const router = useRouter();
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
@@ -20,52 +51,54 @@ export default function UploadPage() {
 
   const uploadImage = async () => {
     if (!uploadedImage) return;
-  
+
     if (uploadedImage.file.size === 0) {
       alert('파일이 비어있습니다.');
       return;
     }
-  
+
     setUploading(true);
     try {
       const formData = new FormData();
-      
+
       const fileBuffer = await uploadedImage.file.arrayBuffer();
-      
+
       if (fileBuffer.byteLength === 0) {
         throw new Error('파일이 비어있습니다.');
       }
-      
-      // --- 해결 지점 ---
-      // 1. 원본 파일에서 확장자를 추출합니다.
+
+      // --- 기존 파일명 처리 ---
       const originalName = uploadedImage.file.name;
       const fileExtension = originalName.slice(((originalName.lastIndexOf(".") - 1) >>> 0) + 2);
-      
-      // 2. 타임스탬프와 영문을 조합하여 안전한 새 파일 이름을 생성합니다.
       const safeFileName = `upload-${Date.now()}${fileExtension ? '.' + fileExtension : ''}`;
-      // --- 해결 지점 ---
-
       const newFile = new File(
-        [fileBuffer], 
-        safeFileName, // 3. 안전하게 생성된 새 파일 이름으로 File 객체를 생성합니다.
-        { 
+        [fileBuffer],
+        safeFileName,
+        {
           type: uploadedImage.file.type,
-          lastModified: uploadedImage.file.lastModified 
+          lastModified: uploadedImage.file.lastModified
         }
       );
-      
       formData.append('file', newFile);
-      
+
       const originalUrl = uploadedImage.originalUrl || uploadedImage.file.name.replace(/\s+/g, '');
       formData.append('originalUrl', originalUrl);
-  
+
+      const thumbnailDataUrl = await generateThumbnail(uploadedImage.preview, 300, 200);
+      const thumbnailBlob = dataURLtoBlob(thumbnailDataUrl);
+      const thumbnailFile = new File([thumbnailBlob], 'thumbnail.png', { type: thumbnailBlob.type });
+      formData.append('thumbnailFile', thumbnailFile);
+
+      // elements(도형 등) - 아직 기능 없으니 빈 문자열
+      formData.append('elements', '');
+
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         if (response.status === 401) {
           router.push('/auth/signin');
@@ -73,11 +106,11 @@ export default function UploadPage() {
         }
         throw new Error(data.error || '업로드에 실패했습니다');
       }
-  
+
       if (!data.data?.id) {
         throw new Error('서버 응답이 올바르지 않습니다');
       }
-  
+
       router.push(`/${data.data.id}`);
     } catch (error) {
       console.error('업로드 실패:', error);
@@ -86,6 +119,8 @@ export default function UploadPage() {
       setUploading(false);
     }
   };
+
+
 
   // 클립보드에서 이미지 붙여넣기 처리
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -206,11 +241,10 @@ export default function UploadPage() {
 
       {/* 업로드 영역 */}
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
             ? 'border-blue-500 bg-blue-50'
             : 'border-gray-300 hover:border-gray-400'
-        }`}
+          }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -287,11 +321,10 @@ export default function UploadPage() {
             <button
               onClick={uploadImage}
               disabled={uploading}
-              className={`px-8 py-3 rounded-lg font-semibold ${
-                uploading
+              className={`px-8 py-3 rounded-lg font-semibold ${uploading
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-green-600 hover:bg-green-700'
-              } text-white transition-colors`}
+                } text-white transition-colors`}
             >
               {uploading ? '업로드 중...' : '이미지 업로드'}
             </button>
