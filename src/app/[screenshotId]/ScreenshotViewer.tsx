@@ -2,6 +2,7 @@
 
 import { CSSProperties, PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ScreenshotViewer.module.css';
+import { FaFont, FaArrowRight, FaMinus, FaSquare, FaCircle, FaEraser, FaUndo, FaRedo } from 'react-icons/fa';
 
 interface Props {
   screenshot: string;
@@ -115,6 +116,16 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
             {originalUrl}
           </a>
         </h1>
+        <div className={styles.Toolbar}>
+          <button type="button" title="텍스트"><FaFont /></button>
+          <button type="button" title="선"><FaMinus /></button>
+          <button type="button" title="화살표"><FaArrowRight /></button>
+          <button type="button" title="사각형"><FaSquare /></button>
+          <button type="button" title="원"><FaCircle /></button>
+          <button type="button" title="지우개"><FaEraser /></button>
+          <button type="button" title="Undo"><FaUndo /></button>
+          <button type="button" title="Redo"><FaRedo /></button>
+        </div>
         <div>
           <select 
             value={sizing} 
