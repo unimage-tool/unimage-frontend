@@ -98,7 +98,6 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
       if (!response.ok) {
         const data = await response.json();
         if (response.status === 401) {
-          router.push('/');
           return;
         }
         throw new Error(data.error || '삭제에 실패했습니다');
@@ -106,7 +105,7 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
 
       // 성공 시 상위 컴포넌트에 삭제된 이미지 ID 전달
       alert('이미지가 삭제되었습니다');
-
+      router.push('/');
     } catch (error) {
       console.error('삭제 실패:', error);
       alert(error instanceof Error ? error.message : '삭제에 실패했습니다. 다시 시도해주세요.');
