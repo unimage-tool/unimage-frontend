@@ -3,8 +3,11 @@
 import { CSSProperties, PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ScreenshotViewer.module.css';
 import { FaFont, FaArrowRight, FaMinus, FaSquare, FaCircle, FaEraser, FaUndo, FaRedo } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import { MdDelete } from 'react-icons/md';
 
 interface Props {
+  id: string;
   screenshot: string;
   originalUrl: string;
   widthPx: number;
@@ -13,7 +16,9 @@ interface Props {
 
 type Sizing = 'image' | 'screen';
 
-export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, heightPx }: Props) {
+
+
+export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx, heightPx }: Props) {
   const [sizing, setSizing] = useState<Sizing>('image');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +26,12 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const loadedImageRef = useRef<HTMLImageElement | null>(null);
-
+  const router = useRouter();
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     const loadedImage = loadedImageRef.current;
-    
+
     if (!canvas || !container || !loadedImage) return;
 
     const ctx = canvas.getContext('2d');
@@ -59,11 +64,11 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
 
     const img = new Image();
     imageRef.current = img;
-    
+
     img.onload = () => {
       // 컴포넌트가 언마운트되었는지 확인
       if (!canvasRef.current || !containerRef.current) return;
-      
+
       loadedImageRef.current = img;
       drawCanvas();
       setIsLoading(false);
@@ -79,6 +84,34 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
     setError(null);
     img.src = screenshot;
   }, [screenshot, drawCanvas]);
+
+  const handleDelete = async (imageId: string) => {
+    if (!confirm('정말로 이 이미지를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/images/${imageId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        if (response.status === 401) {
+          router.push('/');
+          return;
+        }
+        throw new Error(data.error || '삭제에 실패했습니다');
+      }
+
+      // 성공 시 상위 컴포넌트에 삭제된 이미지 ID 전달
+      alert('이미지가 삭제되었습니다');
+
+    } catch (error) {
+      console.error('삭제 실패:', error);
+      alert(error instanceof Error ? error.message : '삭제에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
 
   useEffect(() => {
     loadImage();
@@ -125,10 +158,11 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
           <button type="button" title="지우개"><FaEraser /></button>
           <button type="button" title="Undo"><FaUndo /></button>
           <button type="button" title="Redo"><FaRedo /></button>
+          <button type="button" title="삭제" onClick={() => handleDelete(id)}><MdDelete /></button>
         </div>
         <div>
-          <select 
-            value={sizing} 
+          <select
+            value={sizing}
             onChange={(e) => setSizing(e.target.value as Sizing)}
             disabled={isLoading}
           >
@@ -137,13 +171,13 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
           </select>
         </div>
       </div>
-      
+
       <ImageContainer sizing={sizing} widthPx={widthPx} heightPx={heightPx}>
         <div ref={containerRef} className={styles.CanvasContainer}>
           {isLoading && <div className={styles.Loading}>로딩 중...</div>}
           {error && <div className={styles.Error}>{error}</div>}
-          <canvas 
-            ref={canvasRef} 
+          <canvas
+            ref={canvasRef}
             style={{ display: isLoading || error ? 'none' : 'block' }}
           />
         </div>
@@ -154,20 +188,20 @@ export default function ScreenshotViewer({ screenshot, originalUrl, widthPx, hei
 
 function ImageContainer({ sizing, widthPx, heightPx, children }
   : PropsWithChildren<{ sizing: Sizing, widthPx: number, heightPx: number }>) {
-  
-  const containerStyle: CSSProperties = sizing === 'image' 
+
+  const containerStyle: CSSProperties = sizing === 'image'
     ? {
-        maxWidth: '100%',
-        overflow: 'auto',
-        width: `${widthPx}px`,
-        height: `${heightPx}px`
-      }
+      maxWidth: '100%',
+      overflow: 'auto',
+      width: `${widthPx}px`,
+      height: `${heightPx}px`
+    }
     : {
-        maxWidth: '100%',
-        overflow: 'hidden',
-        width: '100%',
-        aspectRatio: `${widthPx / heightPx}`
-      };
+      maxWidth: '100%',
+      overflow: 'hidden',
+      width: '100%',
+      aspectRatio: `${widthPx / heightPx}`
+    };
 
   return (
     <div className={styles.ImageContainer} style={containerStyle}>

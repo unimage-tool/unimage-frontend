@@ -1,70 +1,74 @@
 .Header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
 }
 
 .OriginalUrl {
-  padding: 8px 14px;
-  display: inline-block;
-  border: 1px solid #999;
-  border-radius: 50px;
-  margin-bottom: 24px;
+  width: 24rem;
+	padding: 8px 14px;
+	display: inline-block;
+	border: 1px solid #999;
+	border-radius: 50px;
+	margin-bottom: 24px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .OriginalUrl:hover {
-  background-color: #f9f9f9;
+	background-color: #f9f9f9;
 }
 
 .ImageContainer {
-  position: relative;
+	position: relative;
 }
 
 .Loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: #666;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	color: #666;
 }
 
 .Error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: #d32f2f;
-  background-color: #ffebee;
-  border: 1px solid #ffcdd2;
-  border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	color: #d32f2f;
+	background-color: #ffebee;
+	border: 1px solid #ffcdd2;
+	border-radius: 4px;
 }
 
 .Toolbar {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding-bottom: 4px;
+	display: flex;
+	gap: 8px;
+	overflow-x: auto;
+	white-space: nowrap;
+	padding-bottom: 4px;
 }
 
 .Toolbar button {
-  padding: 6px 14px;
-  border: 1px solid #bbb;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.15s, border 0.15s;
+	padding: 6px 14px;
+	border: 1px solid #bbb;
+	background: #fff;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 1rem;
+	transition: background 0.15s, border 0.15s;
 }
 
 .Toolbar button:hover {
-  background: #f0f0f0;
-  border-color: #888;
+	background: #f0f0f0;
+	border-color: #888;
 }
 
 @media (max-width: 48rem) {
-  .Toolbar button {
-    padding: 4px 8px;
-    font-size: 0.9rem;
-  }
+	.Toolbar button {
+		padding: 4px 8px;
+		font-size: 0.9rem;
+	}
 }
