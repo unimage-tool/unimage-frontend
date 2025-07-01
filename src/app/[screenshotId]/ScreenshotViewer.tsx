@@ -16,17 +16,33 @@ interface Props {
 
 type Sizing = 'image' | 'screen';
 
+const fileExtPattern = /\.(png|jpe?g|gif|bmp|svg|webp|pdf|txt|docx?|xlsx?|pptx?|zip|tar|gz|rar|7z)$/i;
 
+const isValidUrl = (urlString: string): boolean => {
+  // (1) 표준/커스텀 프로토콜 모두 허용
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(urlString)) return true;
+  // (2) 파일명 패턴은 링크 금지
+  if (fileExtPattern.test(urlString.trim())) return false;
+  // (3) 도메인 패턴 (TLD)
+  return /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/.test(urlString.trim());
+};
+
+const getSafeHref = (urlString: string) =>
+  /^https?:\/\//i.test(urlString)
+    ? urlString
+    : 'http://' + urlString.trim();
 
 export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx, heightPx }: Props) {
   const [sizing, setSizing] = useState<Sizing>('image');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUrlValid, setIsUrlValid] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const loadedImageRef = useRef<HTMLImageElement | null>(null);
   const router = useRouter();
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -113,6 +129,10 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
   };
 
   useEffect(() => {
+    setIsUrlValid(isValidUrl(originalUrl));
+  }, [originalUrl]);
+
+  useEffect(() => {
     loadImage();
   }, [loadImage]);
 
@@ -143,11 +163,15 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
   return (
     <>
       <div className={styles.Header}>
-        <h1>
-          <a href={originalUrl} className={styles.OriginalUrl} target="_blank" rel="noopener noreferrer">
+        {isUrlValid ? (
+          <a href={getSafeHref(originalUrl)} className={styles.OriginalUrl} target="_blank" rel="noopener noreferrer">
             {originalUrl}
           </a>
-        </h1>
+        ) : (
+          <span className={styles.OriginalUrl} style={{ cursor: 'default', pointerEvents: 'none' }}>
+            {originalUrl}
+          </span>
+        )}
         <div className={styles.Toolbar}>
           <button type="button" title="텍스트"><FaFont /></button>
           <button type="button" title="선"><FaMinus /></button>
@@ -157,18 +181,17 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
           <button type="button" title="지우개"><FaEraser /></button>
           <button type="button" title="Undo"><FaUndo /></button>
           <button type="button" title="Redo"><FaRedo /></button>
-          <button type="button" title="삭제" onClick={() => handleDelete(id)}><MdDelete /></button>
+          <button type="button" title="삭제" className='text-red-600' onClick={() => handleDelete(id)}><MdDelete /></button>
         </div>
-        <div>
-          <select
-            value={sizing}
-            onChange={(e) => setSizing(e.target.value as Sizing)}
-            disabled={isLoading}
-          >
-            <option value="image">원본 크기</option>
-            <option value="screen">화면 크기</option>
-          </select>
-        </div>
+        <select
+          value={sizing}
+          onChange={(e) => setSizing(e.target.value as Sizing)}
+          disabled={isLoading}
+          className={styles.SizingSelect}
+        >
+          <option value="image">원본 크기</option>
+          <option value="screen">화면 크기</option>
+        </select>
       </div>
 
       <ImageContainer sizing={sizing} widthPx={widthPx} heightPx={heightPx}>

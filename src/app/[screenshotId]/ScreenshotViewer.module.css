@@ -1,23 +1,57 @@
 .Header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr;
+	grid-template-areas: 'url toolbar-start toolbar-end sizing';
+	align-items: center;
+	width: 100%;
+	gap: 12px;
+	padding-bottom: 12px;
 }
 
 .OriginalUrl {
-  width: 24rem;
+	grid-area: url;
+	min-width: 12ch;
+	max-width: 48ch;
 	padding: 8px 14px;
 	display: inline-block;
 	border: 1px solid #999;
 	border-radius: 50px;
-	margin-bottom: 24px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	justify-self: start;
+	cursor: pointer; /* Default cursor for links */
 }
 
 .OriginalUrl:hover {
 	background-color: #f9f9f9;
+}
+
+.Toolbar {
+	grid-area: toolbar-start / toolbar-end;
+	justify-self: center;
+	display: flex;
+	gap: 8px;
+}
+
+.Toolbar button {
+	padding: 6px 14px;
+	border: 1px solid #bbb;
+	background: #fff;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 1rem;
+	transition: background 0.15s, border 0.15s;
+}
+
+.Toolbar button:hover {
+	background: #f0f0f0;
+	border-color: #888;
+}
+
+.SizingSelect {
+	grid-area: sizing;
+	justify-self: end;
 }
 
 .ImageContainer {
@@ -43,32 +77,30 @@
 	border-radius: 4px;
 }
 
-.Toolbar {
-	display: flex;
-	gap: 8px;
-	overflow-x: auto;
-	white-space: nowrap;
-	padding-bottom: 4px;
+@media (max-width: 80rem) {
+	.Header {
+		grid-template-columns: 1fr auto;
+		grid-template-rows: auto auto;
+		grid-template-areas:
+			'url sizing'
+			'toolbar toolbar';
+		gap: 8px;
+		padding-bottom: 0;
+	}
+
+	.SizingSelect {
+		justify-self: end;
+	}
+
+	.Toolbar {
+		grid-area: toolbar;
+		justify-self: center;
+		padding: 12px 0;
+	}
 }
 
-.Toolbar button {
-	padding: 6px 14px;
-	border: 1px solid #bbb;
-	background: #fff;
-	border-radius: 6px;
-	cursor: pointer;
-	font-size: 1rem;
-	transition: background 0.15s, border 0.15s;
-}
-
-.Toolbar button:hover {
-	background: #f0f0f0;
-	border-color: #888;
-}
-
-@media (max-width: 48rem) {
-	.Toolbar button {
-		padding: 4px 8px;
-		font-size: 0.9rem;
+@media (max-width: 60rem) {
+	.OriginalUrl {
+		max-width: 32ch;
 	}
 }
