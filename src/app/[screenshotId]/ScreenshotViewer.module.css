@@ -10,7 +10,26 @@
 
 .OriginalUrl {
 	grid-area: url;
-	min-width: 12ch;
+	justify-self: start;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.Title {
+	max-width: 20ch;
+	font-family: 'Noto Sans KR', sans-serif;
+	font-size: 1.25rem;
+	font-weight: bold;
+	text-align: left;
+	color: #222;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.Url {
+	min-width: 4ch;
 	max-width: 48ch;
 	padding: 8px 14px;
 	display: inline-block;
@@ -19,11 +38,10 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	justify-self: start;
 	cursor: pointer; /* Default cursor for links */
 }
 
-.OriginalUrl:hover {
+.Url:hover {
 	background-color: #f9f9f9;
 }
 
@@ -96,11 +114,22 @@
 		grid-area: toolbar;
 		justify-self: center;
 		padding: 12px 0;
+		flex-wrap: wrap;
 	}
 }
 
 @media (max-width: 60rem) {
 	.OriginalUrl {
-		max-width: 32ch;
+		flex-flow: column;
+    align-items: flex-start;
+	}
+	.Url {
+		max-width: 24ch;
+	}
+}
+
+@media (max-width: 30rem) {
+	.Url {
+		max-width: 18ch;
 	}
 }
