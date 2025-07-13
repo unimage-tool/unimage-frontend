@@ -16,17 +16,7 @@ async function fetchScreenshotData(id: string, cookie: string) {
     }
 
     const { data } = await response.json();
-    return {
-      id: data.id,
-      originalUrl: data.originalUrl,
-      widthPx: data.width,
-      heightPx: data.height,
-      objectKey: data.objectKey,
-      fileName: data.fileName,
-      size: data.size,
-      screenshot: data.screenshot,
-      uploadedAt: data.uploadedAt,
-    };
+    return data;
   } catch (error) {
     console.error('스크린샷 데이터 로드 실패:', error);
     notFound();
@@ -43,10 +33,10 @@ interface PageProps {
 export default async function ScreenshotPage({ params }: PageProps) {
   // Next.js 15에서 params는 Promise이므로 await 필요
   const resolvedParams = await params;
-  
+
   const headersList = await headers();
   const cookie = headersList.get('cookie') || '';
-  
+
   try {
     const screenshotData = await fetchScreenshotData(resolvedParams.screenshotId, cookie);
     return (

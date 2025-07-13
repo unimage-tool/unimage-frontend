@@ -5,13 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
 import FilterOptions from './FilterOptions';
-import { Image } from '../../types/image';
+import { Screenshot } from '../../types/image';
 
 function StorageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [images, setImages] = useState<Image[]>([]);
-  const [filteredImages, setFilteredImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<Screenshot[]>([]);
+  const [filteredImages, setFilteredImages] = useState<Screenshot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

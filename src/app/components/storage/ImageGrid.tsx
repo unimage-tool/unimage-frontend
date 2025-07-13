@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LinkIcon } from '@heroicons/react/24/outline';
-import { Image as ImageType } from '../../types/image';
+import { Screenshot } from '../../types/image';
 
 interface ImageGridProps {
-  screenshots: ImageType[];
+  screenshots: Screenshot[];
 }
 
 export default function ImageGrid({ screenshots }: ImageGridProps) {

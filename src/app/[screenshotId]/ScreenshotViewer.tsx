@@ -5,14 +5,7 @@ import styles from './ScreenshotViewer.module.css';
 import { FaFont, FaArrowRight, FaMinus, FaSquare, FaCircle, FaEraser, FaUndo, FaRedo } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { MdDelete } from 'react-icons/md';
-
-interface Props {
-  id: string;
-  screenshot: string;
-  originalUrl: string;
-  widthPx: number;
-  heightPx: number;
-}
+import { Screenshot } from '../types/image';
 
 type Sizing = 'image' | 'screen';
 
@@ -32,7 +25,7 @@ const getSafeHref = (urlString: string) =>
     ? urlString
     : 'http://' + urlString.trim();
 
-export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx, heightPx }: Props) {
+export default function ScreenshotViewer({ id, screenshot, originalUrl, width, height, title }: Screenshot) {
   const [sizing, setSizing] = useState<Sizing>('image');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,13 +48,13 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
 
     try {
       if (sizing === 'image') {
-        canvas.width = widthPx;
-        canvas.height = heightPx;
+        canvas.width = width;
+        canvas.height = height;
       } else {
         const containerWidth = container.clientWidth;
-        const scale = containerWidth / widthPx;
+        const scale = containerWidth / width;
         canvas.width = containerWidth;
-        canvas.height = heightPx * scale;
+        canvas.height = height * scale;
       }
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -69,7 +62,7 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
     } catch {
       setError('이미지 렌더링 중 오류가 발생했습니다.');
     }
-  }, [sizing, widthPx, heightPx]);
+  }, [sizing, width, height]);
 
   const loadImage = useCallback(() => {
     // 기존 이미지 정리
@@ -163,14 +156,22 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
   return (
     <>
       <div className={styles.Header}>
+
+
         {isUrlValid ? (
-          <a href={getSafeHref(originalUrl)} className={styles.OriginalUrl} target="_blank" rel="noopener noreferrer">
-            {originalUrl}
-          </a>
+          <div className={styles.OriginalUrl}>
+            <div className={styles.Title}>{title || "No Title"}</div>
+            <a href={getSafeHref(originalUrl)} className={styles.Url} target="_blank" rel="noopener noreferrer">
+              {originalUrl}
+            </a>
+          </div>
         ) : (
-          <span className={styles.OriginalUrl} style={{ cursor: 'default', pointerEvents: 'none' }}>
-            {originalUrl}
-          </span>
+          <div className={styles.OriginalUrl}>
+            <div className={styles.Title}>{title || "No Title"}</div>
+            <span style={{ cursor: 'default', pointerEvents: 'none' }} className={styles.Url}>
+              {originalUrl}
+            </span>
+          </div>
         )}
         <div className={styles.Toolbar}>
           <button type="button" title="텍스트"><FaFont /></button>
@@ -194,7 +195,7 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, widthPx,
         </select>
       </div>
 
-      <ImageContainer sizing={sizing} widthPx={widthPx} heightPx={heightPx}>
+      <ImageContainer sizing={sizing} widthPx={width} heightPx={height}>
         <div ref={containerRef} className={styles.CanvasContainer}>
           {isLoading && <div className={styles.Loading}>로딩 중...</div>}
           {error && <div className={styles.Error}>{error}</div>}
