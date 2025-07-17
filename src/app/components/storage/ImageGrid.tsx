@@ -51,6 +51,7 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  <p>{image.title || "No Title"}</p>
                   <div className="flex items-center justify-between text-sm">
                     <h3
                       className="text-lg font-semibold mb-1 truncate"
@@ -78,7 +79,7 @@ export default function ImageGrid({ screenshots }: ImageGridProps) {
                   <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
                     <LinkIcon className="w-4 h-4 text-white" />
                   </div>
-                  
+
                   {/* URL 텍스트 컨테이너 */}
                   <div className="max-w-0 group-hover/url:max-w-[28rem] md:group-hover/url:max-w-[16rem] transition-all duration-300 ease-in-out overflow-hidden">
                     <div className="pr-4 text-white text-sm whitespace-nowrap truncate">
