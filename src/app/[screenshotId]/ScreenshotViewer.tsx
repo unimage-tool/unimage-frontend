@@ -6,6 +6,7 @@ import { FaFont, FaArrowRight, FaMinus, FaSquare, FaCircle, FaEraser, FaUndo, Fa
 import { useRouter } from 'next/navigation';
 import { MdDelete } from 'react-icons/md';
 import { Screenshot } from '../types/image';
+import { ElementType, textElementType } from './elements/elementType';
 
 type Sizing = 'image' | 'screen';
 
@@ -35,6 +36,8 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, width, h
   const imageRef = useRef<HTMLImageElement | null>(null);
   const loadedImageRef = useRef<HTMLImageElement | null>(null);
   const router = useRouter();
+
+  const [selectedElementType, setSelectedElementType] = useState<ElementType | null>(null);
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -153,6 +156,10 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, width, h
     };
   }, [drawCanvas]);
 
+  useEffect(() => {
+
+  }, [selectedElementType]);
+
   return (
     <>
       <div className={styles.Header}>
@@ -174,7 +181,7 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, width, h
           </div>
         )}
         <div className={styles.Toolbar}>
-          <button type="button" title="텍스트"><FaFont /></button>
+          <button type="button" title="텍스트" onClick={() => setSelectedElementType(textElementType)}><FaFont /></button>
           <button type="button" title="선"><FaMinus /></button>
           <button type="button" title="화살표"><FaArrowRight /></button>
           <button type="button" title="사각형"><FaSquare /></button>
@@ -196,7 +203,7 @@ export default function ScreenshotViewer({ id, screenshot, originalUrl, width, h
       </div>
 
       <ImageContainer sizing={sizing} widthPx={width} heightPx={height}>
-        <div ref={containerRef} className={styles.CanvasContainer}>
+        <div ref={containerRef} className={styles.CanvasContainer} style={{ cursor: selectedElementType?.cursorStyle }}>
           {isLoading && <div className={styles.Loading}>로딩 중...</div>}
           {error && <div className={styles.Error}>{error}</div>}
           <canvas
