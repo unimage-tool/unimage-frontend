@@ -89,8 +89,7 @@ export default function UploadPage() {
       const thumbnailBlob = dataURLtoBlob(thumbnailDataUrl);
       const thumbnailFile = new File([thumbnailBlob], 'thumbnail.png', { type: thumbnailBlob.type });
       formData.append('thumbnailFile', thumbnailFile);
-
-      // elements(도형 등) - 아직 기능 없으니 빈 문자열
+      formData.append('title', uploadedImage.title || '');
       formData.append('elements', '');
 
       const response = await fetch('/api/upload', {
