@@ -69,10 +69,9 @@ export default function Quota() {
         <span className="text-sm font-medium text-gray-700">무제한 저장소</span>
       ) : (
         <span className="text-sm font-medium text-gray-700">
-          {usedQuotaGB.toFixed(3)} GB / {maxQuotaGB} GB&nbsp;
-          ·&nbsp;
-          {(usagePercentage * 100).toFixed(4)}% 사용됨
-        </span>
+        {usedQuotaGB.toFixed(3)} GB / {maxQuotaGB} GB&nbsp;
+        (<span className="text-blue-600">{(usagePercentage * 100).toFixed(2)}%</span>)
+      </span>
       )}
       {exceeded && (
         <span className="text-xs text-red-500 font-bold ml-2">

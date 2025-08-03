@@ -13,7 +13,7 @@ export default function Home() {
           <Quota />
           <Link
             href="/upload"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 transition-colors"
+            className="whitespace-nowrap bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 transition-colors"
           >
             <FaPlus />
             <span>업로드</span>
