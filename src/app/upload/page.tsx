@@ -244,7 +244,7 @@ export default function UploadPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">이미지 업로드</h1>
+      <h1 className="text-3xl font-bold mb-8">업로드</h1>
 
       {/* 업로드 영역 */}
       <div
