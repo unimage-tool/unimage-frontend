@@ -60,8 +60,6 @@ export default function Quota() {
     usedQuotaGB,
     usagePercentage,
     unlimited,
-    atWarningThreshold,
-    atCriticalThreshold,
     exceeded,
   } = quota;
 
@@ -82,23 +80,6 @@ export default function Quota() {
           }
         </span>
       </div>
-      {!unlimited && (
-        <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
-          <div
-            className={`
-              h-full rounded-full transition-all
-              ${exceeded
-                ? 'bg-red-500'
-                : atCriticalThreshold
-                  ? 'bg-orange-500'
-                  : atWarningThreshold
-                    ? 'bg-yellow-400'
-                    : 'bg-blue-500'}
-            `}
-            style={{ width: `${Math.min(usagePercentage * 100, 100)}%` }}
-          ></div>
-        </div>
-      )}
       <div className="text-xs text-gray-500 text-right">
         {unlimited
           ? '무제한 저장소'
